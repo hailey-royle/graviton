@@ -3,7 +3,7 @@
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HIGHT 1080
-#define GRAVITON_WH 64
+#define HALF_SPRITE_WH 32
 #define GRAVITY 0.25
 
 #define GRAV_BLACK (Color){15, 15, 15, 255}
@@ -12,7 +12,7 @@
 Texture2D _testingGraviton;
 Texture2D _testingAtom;
 
-Vector2 gravitonPosition = (Vector2){((WINDOW_WIDTH / 2) - (GRAVITON_WH / 2)), ((WINDOW_HIGHT / 2) - (GRAVITON_WH / 2))};
+Vector2 gravitonPosition = (Vector2){((WINDOW_WIDTH / 2) - HALF_SPRITE_WH), ((WINDOW_HIGHT / 2) - HALF_SPRITE_WH))};
 Vector2 atomPosition = (Vector2){255, 255};
 Vector2 atomSpeed = (Vector2){0, 0};
 Vector2 atomForce = (Vector2){0, 0};
@@ -52,8 +52,7 @@ void Draw() {
     EndDrawing();
 }
 
-int main(void)
-{
+int main(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HIGHT, "graviton");
 
     _testingGraviton = LoadTexture("assets/TestingGraviton.png");
