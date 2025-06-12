@@ -4,6 +4,7 @@
 #define WINDOW_WIDTH 1920
 #define WINDOW_HIGHT 1080
 #define GRAVITON_WH 64
+#define GRAVITY 0.25
 
 #define GRAV_BLACK (Color){15, 15, 15, 255}
 #define GRAV_WHITE (Color){239, 239, 239, 255}
@@ -25,7 +26,7 @@ void UpdateGraviton() {
 }
 
 void UpdateAtom() {
-    atomForce = Vector2Scale(Vector2Subtract(gravitonPosition, atomPosition), (.5 / Vector2Distance(atomPosition, gravitonPosition)));
+    atomForce = Vector2Scale(Vector2Subtract(gravitonPosition, atomPosition), (GRAVITY / Vector2Distance(atomPosition, gravitonPosition)));
     atomSpeed = Vector2Add(atomSpeed, atomForce);
     atomPosition = Vector2Add(atomPosition, atomSpeed);
 }
