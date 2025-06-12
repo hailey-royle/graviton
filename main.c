@@ -9,13 +9,13 @@
 
 Texture2D _testingGraviton;
 
-Vector2 gravitonPosition = (Vector2){255, 255};
+Vector2 gravitonPosition = (Vector2){((WINDOW_WIDTH / 2) - (GRAVITON_WH / 2)), ((WINDOW_HIGHT / 2) - (GRAVITON_WH / 2))};
 
 void UpdateGraviton() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         gravitonPosition = GetMousePosition();
-        gravitonPosition.x -= (GRAVITON_WH/2);
-        gravitonPosition.y -= (GRAVITON_WH/2);
+        gravitonPosition.x -= (GRAVITON_WH / 2);
+        gravitonPosition.y -= (GRAVITON_WH / 2);
     }
 }
 
