@@ -5,6 +5,12 @@
 
 #define GRAV_BLACK (Color){15, 15, 15, 255}
 
+void Draw() { 
+    BeginDrawing();
+        ClearBackground(GRAV_BLACK);
+    EndDrawing();
+}
+
 int main(void)
 {
     InitWindow(WINDOW_WIDTH, WINDOW_HIGHT, "graviton");
@@ -13,9 +19,7 @@ int main(void)
 
     while (!WindowShouldClose())
     {
-        BeginDrawing();
-            ClearBackground(GRAV_BLACK);
-        EndDrawing();
+        Draw();
     }
     CloseWindow();
 
