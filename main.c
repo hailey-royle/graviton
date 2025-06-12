@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <raymath.h>
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HIGHT 1080
@@ -12,6 +13,8 @@ Texture2D _testingAtom;
 
 Vector2 gravitonPosition = (Vector2){((WINDOW_WIDTH / 2) - (GRAVITON_WH / 2)), ((WINDOW_HIGHT / 2) - (GRAVITON_WH / 2))};
 Vector2 atomPosition = (Vector2){255, 255};
+Vector2 atomSpeed = (Vector2){0, 0};
+Vector2 atomForce = (Vector2){0, 0};
 
 void UpdateGraviton() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -21,8 +24,15 @@ void UpdateGraviton() {
     }
 }
 
+void UpdateAtom() {
+    atomForce = Vector2Scale(Vector2Subtract(gravitonPosition, atomPosition), (.5 / Vector2Distance(atomPosition, gravitonPosition)));
+    atomSpeed = Vector2Add(atomSpeed, atomForce);
+    atomPosition = Vector2Add(atomPosition, atomSpeed);
+}
+
 void Update(){
     UpdateGraviton();
+    UpdateAtom();
 }
 
 void DrawGraviton() {
