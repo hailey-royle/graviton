@@ -49,7 +49,6 @@ void Draw() {
         ClearBackground(GRAV_BLACK);
         DrawGraviton();
         DrawAtom();
-        DrawRectangle(255, 255, 1, 1, RED);
     EndDrawing();
 }
 
