@@ -31,7 +31,7 @@ void UpdateAtom() {
     atomPosition = Vector2Add(atomPosition, atomSpeed);
 }
 
-void Update(){
+void Update() {
     UpdateGraviton();
     UpdateAtom();
 }
@@ -60,8 +60,7 @@ int main(void) {
 
     SetTargetFPS(60);
 
-    while (!WindowShouldClose())
-    {
+    while (!WindowShouldClose()) {
         Update();
         Draw();
     }
