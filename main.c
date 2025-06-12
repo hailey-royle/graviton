@@ -4,10 +4,12 @@
 #define WINDOW_HIGHT 1080
 
 #define GRAV_BLACK (Color){15, 15, 15, 255}
+#define GRAV_WHITE (Color){239, 239, 239, 255}
 
-void Draw() { 
+void Draw() {
     BeginDrawing();
         ClearBackground(GRAV_BLACK);
+        DrawCircle(100, 100, 50.0, GRAV_WHITE);
     EndDrawing();
 }
 
