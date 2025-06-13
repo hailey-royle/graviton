@@ -12,7 +12,7 @@
 Texture2D _testingGraviton;
 Texture2D _testingAtom;
 
-Vector2 gravitonPosition = (Vector2){((WINDOW_WIDTH / 2) - HALF_SPRITE_WH), ((WINDOW_HIGHT / 2) - HALF_SPRITE_WH)};
+Vector2 gravitonPosition = (Vector2){(WINDOW_WIDTH / 2), (WINDOW_HIGHT / 2)};
 Vector2 atomPosition = (Vector2){255, 255};
 Vector2 atomSpeed = (Vector2){0, 0};
 Vector2 atomForce = (Vector2){0, 0};
@@ -20,8 +20,6 @@ Vector2 atomForce = (Vector2){0, 0};
 void UpdateGraviton() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         gravitonPosition = GetMousePosition();
-        gravitonPosition.x -= HALF_SPRITE_WH;
-        gravitonPosition.y -= HALF_SPRITE_WH;
     }
 }
 
@@ -37,11 +35,11 @@ void Update() {
 }
 
 void DrawGraviton() {
-    DrawTextureV(_testingGraviton, gravitonPosition, GRAV_WHITE);
+    DrawTextureV(_testingGraviton, Vector2SubtractValue(gravitonPosition, HALF_SPRITE_WH), GRAV_WHITE);
 }
 
 void DrawAtom() {
-    DrawTextureV(_testingAtom, atomPosition, GRAV_WHITE);
+    DrawTextureV(_testingAtom, Vector2SubtractValue(atomPosition, HALF_SPRITE_WH), GRAV_WHITE);
 }
 
 void Draw() {
