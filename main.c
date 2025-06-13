@@ -3,6 +3,7 @@
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HIGHT 1080
+#define FPS 60
 #define HALF_SPRITE_WH 32
 #define GRAVITY 0.25
 
@@ -56,7 +57,7 @@ int main(void) {
     _testingGraviton = LoadTexture("assets/TestingGraviton.png");
     _testingAtom = LoadTexture("assets/TestingAtom.png");
 
-    SetTargetFPS(60);
+    SetTargetFPS(FPS);
 
     while (!WindowShouldClose()) {
         Update();
