@@ -6,7 +6,7 @@
 #define FPS 60
 #define HALF_SPRITE_WH 32
 #define GRAVITY 0.4
-#define ATOM_TRACE_THICK 4
+#define ATOM_TRACE_THICK 1
 
 #define GRAV_BLACK (Color){15, 15, 15, 255}
 #define GRAV_WHITE (Color){239, 239, 239, 255}
