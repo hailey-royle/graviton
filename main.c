@@ -17,16 +17,18 @@ Texture2D testingAtom;
 
 int currentAtomTraceSection = 0;
 
-Vector2 gravitonPosition = (Vector2){(WINDOW_WIDTH / 2), (WINDOW_HIGHT / 2)};
+Vector2 gravitonPosition = (Vector2){512, (512)};
 Vector2 atomPosition = (Vector2){255, 255};
 Vector2 atomSpeed = (Vector2){0, 0};
 Vector2 atomForce = (Vector2){0, 0};
 
-Rectangle finishBox = (Rectangle){200, 800, 64, 64};
+Rectangle finishBox = (Rectangle){1400, 800, 64, 64};
+Rectangle obstacleBox = (Rectangle){(WINDOW_WIDTH / 2), 0, 64, WINDOW_HIGHT};
 
 enum GameState {
     GAME_PLAY,
-    GAME_END
+    GAME_WON,
+    GAME_LOST
 };
 enum GameState gameState = GAME_PLAY;
 
@@ -58,7 +60,10 @@ void UpdateAtomTrace() {
 
 void AtomCollision() {
     if (CheckCollisionPointRec(atomPosition, finishBox)) {
-        gameState = GAME_END;
+        gameState = GAME_WON;
+    }
+    if (CheckCollisionPointRec(atomPosition, obstacleBox)) {
+        gameState = GAME_LOST;
     }
 }
 
@@ -71,12 +76,15 @@ void UpdateAtom() {
 }
 
 void Update() {
-    UpdateGraviton();
-    UpdateAtom();
+    if ((gameState == GAME_PLAY)) {
+        UpdateGraviton();
+        UpdateAtom();
+    }
 }
 
 void DrawMap() {
     DrawRectangleLinesEx(finishBox, 4.0, RED);
+    DrawRectangleLinesEx(obstacleBox, 4.0, BLUE);
 }
 
 void DrawAtomTrace() {
@@ -105,9 +113,13 @@ void Draw() {
             DrawAtom();
             DrawGraviton();
         }
-        if ((gameState == GAME_END)) {
+        if ((gameState == GAME_WON)) {
             ClearBackground(GRAV_BLACK);
-            DrawText("You Win", 512, 256, 64, GRAV_WHITE);
+            DrawText("You Won!", 512, 256, 64, GRAV_WHITE);
+        }
+        if ((gameState == GAME_LOST)) {
+            ClearBackground(GRAV_BLACK);
+            DrawText("You Lost!", 512, 256, 64, GRAV_WHITE);
         }
     EndDrawing();
 }
