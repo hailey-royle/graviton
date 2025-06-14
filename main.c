@@ -47,6 +47,10 @@ void StartButtonInput() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         if (CheckCollisionPointRec(GetMousePosition(), startButtonRectangle)) {
             gameState = GAME_PLAY;
+            gravitonPosition = (Vector2){512, (512)};
+            atomPosition = (Vector2){255, 255};
+            atomSpeed = (Vector2){0, 0};
+            atomForce = (Vector2){0, 0};
         }
     }
 }
@@ -92,6 +96,9 @@ void Update() {
     if (gameState == GAME_PLAY) {
         UpdateGraviton();
         UpdateAtom();
+    }
+    if (gameState == GAME_LOST || gameState == GAME_WON) {
+        StartButtonInput();
     }
 }
 
@@ -139,10 +146,12 @@ void Draw() {
         if ((gameState == GAME_WON)) {
             ClearBackground(GRAV_BLACK);
             DrawText("You Won!", 512, 256, 64, GRAV_WHITE);
+            DrawStartButton();
         }
         if ((gameState == GAME_LOST)) {
             ClearBackground(GRAV_BLACK);
             DrawText("You Lost!", 512, 256, 64, GRAV_WHITE);
+            DrawStartButton();
         }
     EndDrawing();
 }
