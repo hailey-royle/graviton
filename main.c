@@ -47,7 +47,7 @@ void UpdateGraviton() {
 
 void UpdateAtomTrace() {
     atomTrace[currentAtomTraceSection].start = atomPosition;
-    atomTrace[currentAtomTraceSection].end = Vector2Add(atomPosition, atomSpeed);
+    atomTrace[currentAtomTraceSection].end = Vector2Add(Vector2Add(atomPosition, atomSpeed), atomForce);
     atomTrace[currentAtomTraceSection].active = true;
     if (currentAtomTraceSection < FPS) {
         ++currentAtomTraceSection;
