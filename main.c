@@ -86,10 +86,10 @@ void UpdateAtom() {
 }
 
 void Update() {
-    if ((gameState == GAME_START)) {
+    if (gameState == GAME_START) {
         StartButtonInput();
     }
-    if ((gameState == GAME_PLAY)) {
+    if (gameState == GAME_PLAY) {
         UpdateGraviton();
         UpdateAtom();
     }
