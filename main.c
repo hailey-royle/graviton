@@ -24,13 +24,15 @@ Vector2 atomForce = (Vector2){0, 0};
 
 Rectangle finishBox = (Rectangle){1400, 800, 64, 64};
 Rectangle obstacleBox = (Rectangle){(WINDOW_WIDTH / 2), 0, 64, WINDOW_HIGHT};
+Rectangle startButtonRectangle = (Rectangle){((WINDOW_WIDTH / 2) - 128), ((WINDOW_HIGHT / 2) - 64), 256, 128};
 
 enum GameState {
+    GAME_START,
     GAME_PLAY,
     GAME_WON,
     GAME_LOST
 };
-enum GameState gameState = GAME_PLAY;
+enum GameState gameState = GAME_START;
 
 
 struct AtomTraceSection {
@@ -40,6 +42,14 @@ struct AtomTraceSection {
 };
 
 struct AtomTraceSection atomTrace[FPS];
+
+void StartButtonInput() {
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (CheckCollisionPointRec(GetMousePosition(), startButtonRectangle)) {
+            gameState = GAME_PLAY;
+        }
+    }
+}
 
 void UpdateGraviton() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -76,10 +86,18 @@ void UpdateAtom() {
 }
 
 void Update() {
+    if ((gameState == GAME_START)) {
+        StartButtonInput();
+    }
     if ((gameState == GAME_PLAY)) {
         UpdateGraviton();
         UpdateAtom();
     }
+}
+
+void DrawStartButton() {
+    DrawRectangleRec(startButtonRectangle, GRAV_DGRAY);
+    DrawText("Start!", ((WINDOW_WIDTH / 2) - 96), ((WINDOW_HIGHT / 2) - 32), 64, GRAV_WHITE);
 }
 
 void DrawMap() {
@@ -107,6 +125,11 @@ void DrawGraviton() {
 
 void Draw() {
     BeginDrawing();
+        if ((gameState == GAME_START)) {
+            ClearBackground(GRAV_BLACK);
+            DrawText("Graviton", 64, 64, 64, GRAV_WHITE);
+            DrawStartButton();
+        }
         if ((gameState == GAME_PLAY)) {
             ClearBackground(GRAV_BLACK);
             DrawMap();
