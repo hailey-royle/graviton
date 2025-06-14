@@ -11,6 +11,8 @@
 #define GRAV_BLACK (Color){15, 15, 15, 255}
 #define GRAV_WHITE (Color){239, 239, 239, 255}
 #define GRAV_DGRAY (Color){63, 63, 63, 255}
+#define GRAV_RED (Color){127, 15, 15, 255}
+#define GRAV_BLUE (Color){15, 15, 127, 255}
 
 Texture2D testingGraviton;
 Texture2D testingAtom;
@@ -43,14 +45,22 @@ struct AtomTraceSection {
 
 struct AtomTraceSection atomTrace[FPS];
 
+void ResetGame() {
+    gravitonPosition = (Vector2){512, (512)};
+    atomPosition = (Vector2){255, 255};
+    atomSpeed = (Vector2){0, 0};
+    atomForce = (Vector2){0, 0};
+    int i = 0;
+    for (i = 0; i <= FPS; i += 1) {
+         atomTrace[i].active = false;
+    }
+}
+
 void StartButtonInput() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         if (CheckCollisionPointRec(GetMousePosition(), startButtonRectangle)) {
+            ResetGame();
             gameState = GAME_PLAY;
-            gravitonPosition = (Vector2){512, (512)};
-            atomPosition = (Vector2){255, 255};
-            atomSpeed = (Vector2){0, 0};
-            atomForce = (Vector2){0, 0};
         }
     }
 }
@@ -108,14 +118,14 @@ void DrawStartButton() {
 }
 
 void DrawMap() {
-    DrawRectangleLinesEx(finishBox, 4.0, RED);
-    DrawRectangleLinesEx(obstacleBox, 4.0, BLUE);
+    DrawRectangleLinesEx(finishBox, 4.0, GRAV_BLUE);
+    DrawRectangleLinesEx(obstacleBox, 4.0, GRAV_RED);
 }
 
 void DrawAtomTrace() {
     int i = 0;
     for (i = 0; i <= FPS; i += 1) {
-         if ((atomTrace[i].active = true)) {
+         if (atomTrace[i].active == true) {
             DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
          }
     }
