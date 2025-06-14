@@ -12,8 +12,8 @@
 #define GRAV_WHITE (Color){239, 239, 239, 255}
 #define GRAV_DGRAY (Color){63, 63, 63, 255}
 
-Texture2D _testingGraviton;
-Texture2D _testingAtom;
+Texture2D testingGraviton;
+Texture2D testingAtom;
 
 int currentAtomTraceSection = 0;
 
@@ -71,11 +71,11 @@ void DrawAtomTrace() {
 
 void DrawAtom() {
     DrawAtomTrace();
-    DrawTextureV(_testingAtom, Vector2SubtractValue(atomPosition, HALF_SPRITE_WH), GRAV_WHITE);
+    DrawTextureV(testingAtom, Vector2SubtractValue(atomPosition, HALF_SPRITE_WH), GRAV_WHITE);
 }
 
 void DrawGraviton() {
-    DrawTextureV(_testingGraviton, Vector2SubtractValue(gravitonPosition, HALF_SPRITE_WH), GRAV_WHITE);
+    DrawTextureV(testingGraviton, Vector2SubtractValue(gravitonPosition, HALF_SPRITE_WH), GRAV_WHITE);
 }
 
 void Draw() {
@@ -89,8 +89,8 @@ void Draw() {
 int main(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HIGHT, "graviton");
 
-    _testingGraviton = LoadTexture("assets/TestingGraviton.png");
-    _testingAtom = LoadTexture("assets/TestingAtom.png");
+    testingGraviton = LoadTexture("assets/TestingGraviton.png");
+    testingAtom = LoadTexture("assets/TestingAtom.png");
 
     SetTargetFPS(FPS);
 
@@ -98,6 +98,10 @@ int main(void) {
         Update();
         Draw();
     }
+
+    UnloadTexture(testingGraviton);
+    UnloadTexture(testingAtom);
+
     CloseWindow();
 
     return 0;
