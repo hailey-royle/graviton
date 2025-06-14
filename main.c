@@ -100,14 +100,14 @@ void UpdateAtom() {
 }
 
 void Update() {
-    if (gameState == GAME_START) {
-        StartButtonInput();
-    }
     if (gameState == GAME_PLAY) {
         UpdateGraviton();
         UpdateAtom();
     }
     if (gameState == GAME_LOST || gameState == GAME_WON) {
+        StartButtonInput();
+    }
+    if (gameState == GAME_START) {
         StartButtonInput();
     }
 }
