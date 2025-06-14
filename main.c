@@ -5,7 +5,7 @@
 #define WINDOW_HIGHT 1080
 #define FPS 60
 #define HALF_SPRITE_WH 32
-#define GRAVITY 0.25
+#define GRAVITY 0.4
 #define ATOM_TRACE_THICK 4
 
 #define GRAV_BLACK (Color){15, 15, 15, 255}
@@ -21,6 +21,15 @@ Vector2 gravitonPosition = (Vector2){(WINDOW_WIDTH / 2), (WINDOW_HIGHT / 2)};
 Vector2 atomPosition = (Vector2){255, 255};
 Vector2 atomSpeed = (Vector2){0, 0};
 Vector2 atomForce = (Vector2){0, 0};
+
+Rectangle finishBox = (Rectangle){200, 800, 64, 64};
+
+enum GameState {
+    GAME_PLAY,
+    GAME_END
+};
+enum GameState gameState = GAME_PLAY;
+
 
 struct AtomTraceSection {
     Vector2 start;
@@ -47,17 +56,27 @@ void UpdateAtomTrace() {
     }
 }
 
+void AtomCollision() {
+    if (CheckCollisionPointRec(atomPosition, finishBox)) {
+        gameState = GAME_END;
+    }
+}
 
 void UpdateAtom() {
     atomForce = Vector2Scale(Vector2Subtract(gravitonPosition, atomPosition), (GRAVITY / Vector2Distance(atomPosition, gravitonPosition)));
     atomSpeed = Vector2Add(atomSpeed, atomForce);
-    atomPosition = Vector2Add(atomPosition, atomSpeed);
+    atomPosition = Vector2Add(Vector2Add(atomPosition, atomSpeed), atomForce);
     UpdateAtomTrace();
+    AtomCollision();
 }
 
 void Update() {
     UpdateGraviton();
     UpdateAtom();
+}
+
+void DrawMap() {
+    DrawRectangleLinesEx(finishBox, 4.0, RED);
 }
 
 void DrawAtomTrace() {
@@ -80,9 +99,16 @@ void DrawGraviton() {
 
 void Draw() {
     BeginDrawing();
-        ClearBackground(GRAV_BLACK);
-        DrawAtom();
-        DrawGraviton();
+        if ((gameState == GAME_PLAY)) {
+            ClearBackground(GRAV_BLACK);
+            DrawMap();
+            DrawAtom();
+            DrawGraviton();
+        }
+        if ((gameState == GAME_END)) {
+            ClearBackground(GRAV_BLACK);
+            DrawText("You Win", 512, 256, 64, GRAV_WHITE);
+        }
     EndDrawing();
 }
 
