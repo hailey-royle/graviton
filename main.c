@@ -1,6 +1,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+
 #define WINDOW_WIDTH 1920
 #define WINDOW_HIGHT 1080
 #define FPS 60
@@ -26,7 +29,7 @@ Vector2 atomForce = (Vector2){0, 0};
 
 Rectangle finishBox = (Rectangle){1400, 800, 64, 64};
 Rectangle obstacleBox = (Rectangle){(WINDOW_WIDTH / 2), 0, 64, WINDOW_HIGHT};
-Rectangle startButtonRectangle = (Rectangle){((WINDOW_WIDTH / 2) - 128), ((WINDOW_HIGHT / 2) - 64), 256, 128};
+Rectangle startButton = (Rectangle){((WINDOW_WIDTH / 2) - 128), ((WINDOW_HIGHT / 2) - 64), 256, 128};
 
 enum gameStateEnum {
     GAME_START,
@@ -50,18 +53,9 @@ void ResetGame() {
     atomPosition = (Vector2){255, 255};
     atomSpeed = (Vector2){0, 0};
     atomForce = (Vector2){0, 0};
-    int i = 0;
-    for (i = 0; i <= FPS; i += 1) {
+    int i;
+    for (i = 0; i <= FPS; i++) {
          atomTrace[i].active = false;
-    }
-}
-
-void StartButtonInput() {
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        if (CheckCollisionPointRec(GetMousePosition(), startButtonRectangle)) {
-            ResetGame();
-            gameState = GAME_PLAY;
-        }
     }
 }
 
@@ -76,7 +70,7 @@ void UpdateAtomTrace() {
     atomTrace[currentAtomTraceSection].end = Vector2Add(Vector2Add(atomPosition, atomSpeed), atomForce);
     atomTrace[currentAtomTraceSection].active = true;
     if (currentAtomTraceSection < FPS) {
-        ++currentAtomTraceSection;
+        currentAtomTraceSection++;
     } else {
         currentAtomTraceSection = 0;
     }
@@ -85,9 +79,11 @@ void UpdateAtomTrace() {
 void AtomCollision() {
     if (CheckCollisionPointRec(atomPosition, finishBox)) {
         gameState = GAME_WON;
+//        ResetGame();
     }
     if (CheckCollisionPointRec(atomPosition, obstacleBox)) {
         gameState = GAME_LOST;
+//        ResetGame();
     }
 }
 
@@ -104,17 +100,13 @@ void Update() {
         UpdateGraviton();
         UpdateAtom();
     }
-    if (gameState == GAME_LOST || gameState == GAME_WON) {
-        StartButtonInput();
-    }
-    if (gameState == GAME_START) {
-        StartButtonInput();
-    }
 }
 
 void DrawStartButton() {
-    DrawRectangleRec(startButtonRectangle, GRAV_DGRAY);
-    DrawText("Start!", ((WINDOW_WIDTH / 2) - 96), ((WINDOW_HIGHT / 2) - 32), 64, GRAV_WHITE);
+    if (GuiButton(startButton, "Start!")) {
+        gameState = GAME_PLAY;
+        return;
+    }
 }
 
 void DrawMap() {
