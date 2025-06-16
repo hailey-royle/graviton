@@ -8,6 +8,7 @@
 #define HALF_SPRITE_WH 32
 #define GRAVITY 0.4
 #define ATOM_TRACE_THICK 4
+#define BUTTONS_NUMBER 16
 
 #define GRAV_BLACK (Color){15, 15, 15, 255}
 #define GRAV_WHITE (Color){239, 239, 239, 255}
@@ -47,7 +48,7 @@ struct Button {
     enum GameState activeState;
 };
 
-struct Button buttons[16];
+struct Button buttons[BUTTONS_NUMBER];
 
 struct AtomTraceSection {
     Vector2 start;
@@ -58,7 +59,7 @@ struct AtomTraceSection {
 struct AtomTraceSection atomTrace[FPS];
 
 void InitGame() {
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < BUTTONS_NUMBER; i++) {
         strcpy(buttons[i].text, "test text");
         buttons[i].rectColor = GRAV_DGRAY;
         buttons[i].textColor = GRAV_WHITE;
@@ -153,7 +154,7 @@ void Update() {
 
 void DrawUi(enum GameState state) {
     int i = 0;
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < BUTTONS_NUMBER; i++) {
         if (buttons[i].activeState == state) {
             DrawRectangleRec(buttons[i].rect, buttons[i].rectColor);
             DrawText(buttons[i].text, (buttons[i].rect.x + buttons[i].textOffset), (buttons[i].rect.y + buttons[i].textOffset), (buttons[i].rect.height - (2 * buttons[i].textOffset)), buttons[i].textColor);
