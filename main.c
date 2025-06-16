@@ -25,13 +25,14 @@ int currentAtomTraceSection = 0;
 bool gameWon = false;
 bool quitGame = false;
 
-Vector2 gravitonPosition = (Vector2){512, (512)};
-Vector2 atomPosition = (Vector2){255, 255};
+Vector2 gravitonPosition = (Vector2){512, 512};
+Vector2 atomPosition = (Vector2){800, 800};
 Vector2 atomSpeed = (Vector2){0, 0};
 Vector2 atomForce = (Vector2){0, 0};
 
-Rectangle finishBox = (Rectangle){1400, 800, 64, 64};
-Rectangle obstacleBox = (Rectangle){(WINDOW_WIDTH / 2), 0, 64, WINDOW_HIGHT};
+Rectangle finishBox = (Rectangle){(WINDOW_WIDTH / 2) - 32, 600, 64, 64};
+Rectangle obstacleBox = (Rectangle){(WINDOW_WIDTH / 2) - 128, 264, 64, 800};
+Rectangle obstacleBox2 = (Rectangle){(WINDOW_WIDTH / 2) + 128, 264, 64, 800};
 
 enum GameState {
     GAME_START,
@@ -99,8 +100,8 @@ void InitGame() {
 }
 
 void ResetGame() {
-    gravitonPosition = (Vector2){512, (512)};
-    atomPosition = (Vector2){255, 255};
+    gravitonPosition = (Vector2){512, 512};
+    atomPosition = (Vector2){800, 800};
     atomSpeed = (Vector2){0, 0};
     atomForce = (Vector2){0, 0};
     for (int i = 0; i <= FPS; i += 1) {
@@ -155,7 +156,7 @@ void AtomCollision() {
         gameState = GAME_END;
         gameWon = true;
     }
-    if (CheckCollisionPointRec(atomPosition, obstacleBox)) {
+    if (CheckCollisionPointRec(atomPosition, obstacleBox2) || CheckCollisionPointRec(atomPosition, obstacleBox)) {
         gameState = GAME_END;
         gameWon = false;
     }
@@ -194,6 +195,7 @@ void DrawUi(enum GameState state) {
 void DrawMap() {
     DrawRectangleLinesEx(finishBox, 4.0, GRAV_BLUE);
     DrawRectangleLinesEx(obstacleBox, 4.0, GRAV_RED);
+    DrawRectangleLinesEx(obstacleBox2, 4.0, GRAV_RED);
 }
 
 void DrawAtomTrace() {
@@ -215,7 +217,6 @@ void DrawGraviton() {
 
 void Draw() {
     BeginDrawing();
-        DrawUi(gameState);
         if (gameState == GAME_PLAY) {
             ClearBackground(GRAV_BLACK);
             DrawMap();
@@ -228,6 +229,9 @@ void Draw() {
         }
         if (gameState == GAME_END) {
             ClearBackground(GRAV_BLACK);
+            DrawMap();
+            DrawAtom();
+            DrawGraviton();
             if (gameWon == true) {
                 DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
             }
@@ -235,6 +239,7 @@ void Draw() {
                 DrawText("You Lost!", 64, 64, 128, GRAV_WHITE);
             }
         }
+        DrawUi(gameState);
     EndDrawing();
 }
 
