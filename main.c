@@ -83,8 +83,7 @@ void ResetGame() {
     atomPosition = (Vector2){255, 255};
     atomSpeed = (Vector2){0, 0};
     atomForce = (Vector2){0, 0};
-    int i = 0;
-    for (i = 0; i <= FPS; i += 1) {
+    for (int i = 0; i <= FPS; i += 1) {
          atomTrace[i].active = false;
     }
 }
@@ -152,8 +151,7 @@ void Update() {
 }
 
 void DrawUi(enum GameState state) {
-    int i = 0;
-    for (i = 0; i < BUTTONS_NUMBER; i++) {
+    for (int i = 0; i < BUTTONS_NUMBER; i++) {
         if (buttons[i].activeState == state) {
             DrawRectangleRec(buttons[i].rect, buttons[i].rectColor);
             DrawText(buttons[i].text, (buttons[i].rect.x + buttons[i].textOffset), (buttons[i].rect.y + buttons[i].textOffset), (buttons[i].rect.height - (2 * buttons[i].textOffset)), buttons[i].textColor);
@@ -167,8 +165,7 @@ void DrawMap() {
 }
 
 void DrawAtomTrace() {
-    int i = 0;
-    for (i = 0; i <= FPS; i += 1) {
+    for (int i = 0; i <= FPS; i += 1) {
          if (atomTrace[i].active == true) {
             DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
          }
