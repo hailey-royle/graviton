@@ -28,22 +28,22 @@ Rectangle finishBox = (Rectangle){1400, 800, 64, 64};
 Rectangle obstacleBox = (Rectangle){(WINDOW_WIDTH / 2), 0, 64, WINDOW_HIGHT};
 Rectangle startButtonRectangle = (Rectangle){((WINDOW_WIDTH / 2) - 128), ((WINDOW_HIGHT / 2) - 64), 256, 128};
 
-enum GameState {
+enum gameStateEnum {
     GAME_START,
     GAME_PLAY,
     GAME_WON,
     GAME_LOST
 };
-enum GameState gameState = GAME_START;
+enum gameStateEnum gameState = GAME_START;
 
 
-struct AtomTraceSection {
+struct atomTraceSectionStruct {
     Vector2 start;
     Vector2 end;
     bool active;
 };
 
-struct AtomTraceSection atomTrace[FPS];
+struct atomTraceSectionStruct atomTrace[FPS];
 
 void ResetGame() {
     gravitonPosition = (Vector2){512, (512)};
