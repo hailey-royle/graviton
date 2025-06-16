@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <string.h>
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HIGHT 1080
@@ -32,10 +33,33 @@ enum GameState {
     GAME_START,
     GAME_PLAY,
     GAME_WON,
-    GAME_LOST
+    GAME_LOST,
+    NONE
 };
 enum GameState gameState = GAME_START;
 
+struct Button {
+    char text[16];
+    Color rectColor;
+    Color textColor;
+    Vector2 position;
+    Vector2 size;
+    enum GameState activeState;
+};
+
+struct Button buttons[16];
+
+void InitGame() {
+    for (int i = 0; i < 16; i++) {
+        strcpy(buttons[i].text, "test text");
+        buttons[i].rectColor = GRAV_DGRAY;
+        buttons[i].textColor = GRAV_WHITE;
+        buttons[i].position = (Vector2){0, 0};
+        buttons[i].size = (Vector2){128, 64};
+        buttons[i].activeState = NONE;
+    }
+    buttons[0].activeState = GAME_START;
+}
 
 struct AtomTraceSection {
     Vector2 start;
@@ -117,6 +141,17 @@ void DrawStartButton() {
     DrawText("Start!", ((WINDOW_WIDTH / 2) - 96), ((WINDOW_HIGHT / 2) - 32), 64, GRAV_WHITE);
 }
 
+void DrawUi(enum GameState state) {
+    int i = 0;
+    for (i = 0; i < 16; i++) {
+        if (buttons[i].activeState == state) {
+            DrawRectangleV(buttons[i].position, buttons[i].size, buttons[i].rectColor);
+            DrawText(buttons[i].text, (buttons[i].position.x + 8), (buttons[i].position.y + 8), (buttons[i].size.y - 16), buttons[i].textColor);
+        }
+    }
+}
+
+
 void DrawMap() {
     DrawRectangleLinesEx(finishBox, 4.0, GRAV_BLUE);
     DrawRectangleLinesEx(obstacleBox, 4.0, GRAV_RED);
@@ -142,6 +177,7 @@ void DrawGraviton() {
 
 void Draw() {
     BeginDrawing();
+        DrawUi(gameState);
         if (gameState == GAME_START) {
             ClearBackground(GRAV_BLACK);
             DrawText("Graviton", 64, 64, 64, GRAV_WHITE);
@@ -173,6 +209,8 @@ int main(void) {
     testingAtom = LoadTexture("assets/TestingAtom.png");
 
     SetTargetFPS(FPS);
+
+    InitGame();
 
     while (!WindowShouldClose()) {
         Update();
