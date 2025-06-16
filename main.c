@@ -78,6 +78,17 @@ void InitGame() {
     buttons[1].activeState = GAME_END;
 }
 
+void ResetGame() {
+    gravitonPosition = (Vector2){512, (512)};
+    atomPosition = (Vector2){255, 255};
+    atomSpeed = (Vector2){0, 0};
+    atomForce = (Vector2){0, 0};
+    int i = 0;
+    for (i = 0; i <= FPS; i += 1) {
+         atomTrace[i].active = false;
+    }
+}
+
 void MouseLogic() {
     if (gameState == GAME_PLAY) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -92,18 +103,8 @@ void MouseLogic() {
     if (gameState == GAME_END) {
         if (CheckCollisionPointRec(GetMousePosition(), buttons[1].rect)) {
             gameState = GAME_START;
+            ResetGame();
         }
-    }
-}
-
-void ResetGame() {
-    gravitonPosition = (Vector2){512, (512)};
-    atomPosition = (Vector2){255, 255};
-    atomSpeed = (Vector2){0, 0};
-    atomForce = (Vector2){0, 0};
-    int i = 0;
-    for (i = 0; i <= FPS; i += 1) {
-         atomTrace[i].active = false;
     }
 }
 
@@ -122,12 +123,10 @@ void AtomCollision() {
     if (CheckCollisionPointRec(atomPosition, finishBox)) {
         gameState = GAME_END;
         gameWon = true;
-        ResetGame();
     }
     if (CheckCollisionPointRec(atomPosition, obstacleBox)) {
         gameState = GAME_END;
         gameWon = false;
-        ResetGame();
     }
 }
 
