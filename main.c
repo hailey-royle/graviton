@@ -44,22 +44,11 @@ struct Button {
     Color textColor;
     Vector2 position;
     Vector2 size;
+    int textOffset;
     enum GameState activeState;
 };
 
 struct Button buttons[16];
-
-void InitGame() {
-    for (int i = 0; i < 16; i++) {
-        strcpy(buttons[i].text, "test text");
-        buttons[i].rectColor = GRAV_DGRAY;
-        buttons[i].textColor = GRAV_WHITE;
-        buttons[i].position = (Vector2){0, 0};
-        buttons[i].size = (Vector2){128, 64};
-        buttons[i].activeState = NONE;
-    }
-    buttons[0].activeState = GAME_START;
-}
 
 struct AtomTraceSection {
     Vector2 start;
@@ -68,6 +57,24 @@ struct AtomTraceSection {
 };
 
 struct AtomTraceSection atomTrace[FPS];
+
+void InitGame() {
+    for (int i = 0; i < 16; i++) {
+        strcpy(buttons[i].text, "test text");
+        buttons[i].rectColor = GRAV_DGRAY;
+        buttons[i].textColor = GRAV_WHITE;
+        buttons[i].position = (Vector2){0, 0};
+        buttons[i].size = (Vector2){256, 64};
+        buttons[i].textOffset = 8;
+        buttons[i].activeState = NONE;
+    }
+    strcpy(buttons[0].text, "Start");
+    buttons[0].position = (Vector2){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64};
+    buttons[0].size = (Vector2){256, 128};
+    buttons[0].textOffset = 32;
+    buttons[0].activeState = GAME_START;
+}
+
 
 void ResetGame() {
     gravitonPosition = (Vector2){512, (512)};
@@ -136,21 +143,15 @@ void Update() {
     }
 }
 
-void DrawStartButton() {
-    DrawRectangleRec(startButtonRectangle, GRAV_DGRAY);
-    DrawText("Start!", ((WINDOW_WIDTH / 2) - 96), ((WINDOW_HIGHT / 2) - 32), 64, GRAV_WHITE);
-}
-
 void DrawUi(enum GameState state) {
     int i = 0;
     for (i = 0; i < 16; i++) {
         if (buttons[i].activeState == state) {
             DrawRectangleV(buttons[i].position, buttons[i].size, buttons[i].rectColor);
-            DrawText(buttons[i].text, (buttons[i].position.x + 8), (buttons[i].position.y + 8), (buttons[i].size.y - 16), buttons[i].textColor);
+            DrawText(buttons[i].text, (buttons[i].position.x + buttons[i].textOffset), (buttons[i].position.y + buttons[i].textOffset), (buttons[i].size.y - (2 * buttons[i].textOffset)), buttons[i].textColor);
         }
     }
 }
-
 
 void DrawMap() {
     DrawRectangleLinesEx(finishBox, 4.0, GRAV_BLUE);
@@ -181,7 +182,6 @@ void Draw() {
         if (gameState == GAME_START) {
             ClearBackground(GRAV_BLACK);
             DrawText("Graviton", 64, 64, 64, GRAV_WHITE);
-            DrawStartButton();
         }
         if (gameState == GAME_PLAY) {
             ClearBackground(GRAV_BLACK);
@@ -192,12 +192,10 @@ void Draw() {
         if (gameState == GAME_WON) {
             ClearBackground(GRAV_BLACK);
             DrawText("You Won!", 512, 256, 64, GRAV_WHITE);
-            DrawStartButton();
         }
         if (gameState == GAME_LOST) {
             ClearBackground(GRAV_BLACK);
             DrawText("You Lost!", 512, 256, 64, GRAV_WHITE);
-            DrawStartButton();
         }
     EndDrawing();
 }
