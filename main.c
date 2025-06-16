@@ -216,23 +216,23 @@ void DrawGraviton() {
 void Draw() {
     BeginDrawing();
         DrawUi(gameState);
-        if (gameState == GAME_START) {
-            ClearBackground(GRAV_BLACK);
-            DrawText("Graviton", 64, 64, 64, GRAV_WHITE);
-        }
         if (gameState == GAME_PLAY) {
             ClearBackground(GRAV_BLACK);
             DrawMap();
             DrawAtom();
             DrawGraviton();
         }
+        if (gameState == GAME_START) {
+            ClearBackground(GRAV_BLACK);
+            DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
+        }
         if (gameState == GAME_END) {
             ClearBackground(GRAV_BLACK);
             if (gameWon == true) {
-                DrawText("You Won!", 512, 256, 64, GRAV_WHITE);
+                DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
             }
             if (gameWon == false) {
-                DrawText("You Lost!", 512, 256, 64, GRAV_WHITE);
+                DrawText("You Lost!", 64, 64, 128, GRAV_WHITE);
             }
         }
     EndDrawing();
