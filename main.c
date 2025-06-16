@@ -22,9 +22,11 @@ Texture2D testingGraviton;
 Texture2D testingAtom;
 
 int currentAtomTraceSection = 0;
+int gravitonMoves = 0;
 
 float timer = 0.0;
-char chartimer[16];
+char charTimer[16];
+char charGravitonMoves[16];
 
 bool gameWon = false;
 bool quitGame = false;
@@ -109,6 +111,7 @@ void ResetGame() {
     atomSpeed = (Vector2){0, 0};
     atomForce = (Vector2){0, 0};
     timer = 0.0;
+    gravitonMoves = 0;
     for (int i = 0; i <= FPS; i += 1) {
          atomTrace[i].active = false;
     }
@@ -118,6 +121,7 @@ void MouseLogic() {
     if (gameState == GAME_PLAY) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             gravitonPosition = GetMousePosition();
+            gravitonMoves++;
         }
     }
     if (gameState == GAME_START) {
@@ -226,8 +230,13 @@ void DrawGraviton() {
 }
 
 void DrawTimer() {
-    sprintf(chartimer, "%lf", timer);
-    DrawText(chartimer, WINDOW_WIDTH - 256, 32, 32, GRAV_WHITE);
+    sprintf(charTimer, "%.2f", timer);
+    DrawText(charTimer, WINDOW_WIDTH - 128, 32, 32, GRAV_WHITE);
+}
+
+void DrawGravitonMoves() {
+    sprintf(charGravitonMoves, "%d", gravitonMoves);
+    DrawText(charGravitonMoves, WINDOW_WIDTH - 128, 96, 32, GRAV_WHITE);
 }
 
 void Draw() {
@@ -238,6 +247,7 @@ void Draw() {
             DrawAtom();
             DrawGraviton();
             DrawTimer();
+            DrawGravitonMoves();
         }
         if (gameState == GAME_START) {
             ClearBackground(GRAV_BLACK);
@@ -249,6 +259,7 @@ void Draw() {
             DrawAtom();
             DrawGraviton();
             DrawTimer();
+            DrawGravitonMoves();
             if (gameWon == true) {
                 DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
             }
