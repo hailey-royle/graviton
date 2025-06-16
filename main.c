@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <string.h>
+#include <stdio.h>
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HIGHT 1080
@@ -21,6 +22,9 @@ Texture2D testingGraviton;
 Texture2D testingAtom;
 
 int currentAtomTraceSection = 0;
+
+float timer = 0.0;
+char chartimer[16];
 
 bool gameWon = false;
 bool quitGame = false;
@@ -104,6 +108,7 @@ void ResetGame() {
     atomPosition = (Vector2){800, 800};
     atomSpeed = (Vector2){0, 0};
     atomForce = (Vector2){0, 0};
+    timer = 0.0;
     for (int i = 0; i <= FPS; i += 1) {
          atomTrace[i].active = false;
     }
@@ -170,12 +175,17 @@ void UpdateAtom() {
     AtomCollision();
 }
 
+void UpdateTimer() {
+    timer += GetFrameTime();
+}
+
 void Update() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         MouseLogic();
     }
     if (gameState == GAME_PLAY) {
         UpdateAtom();
+        UpdateTimer();
     }
     if (gameState == GAME_END) {
     }
@@ -215,6 +225,11 @@ void DrawGraviton() {
     DrawTextureV(testingGraviton, Vector2SubtractValue(gravitonPosition, HALF_SPRITE_WH), GRAV_WHITE);
 }
 
+void DrawTimer() {
+    sprintf(chartimer, "%lf", timer);
+    DrawText(chartimer, WINDOW_WIDTH - 256, 32, 32, GRAV_WHITE);
+}
+
 void Draw() {
     BeginDrawing();
         if (gameState == GAME_PLAY) {
@@ -222,6 +237,7 @@ void Draw() {
             DrawMap();
             DrawAtom();
             DrawGraviton();
+            DrawTimer();
         }
         if (gameState == GAME_START) {
             ClearBackground(GRAV_BLACK);
@@ -232,6 +248,7 @@ void Draw() {
             DrawMap();
             DrawAtom();
             DrawGraviton();
+            DrawTimer();
             if (gameWon == true) {
                 DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
             }
