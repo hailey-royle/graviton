@@ -13,6 +13,7 @@
 #define GRAV_BLACK (Color){15, 15, 15, 255}
 #define GRAV_WHITE (Color){239, 239, 239, 255}
 #define GRAV_DGRAY (Color){63, 63, 63, 255}
+#define GRAV_LGRAY (Color){191, 191, 191, 255}
 #define GRAV_RED (Color){127, 15, 15, 255}
 #define GRAV_BLUE (Color){15, 15, 127, 255}
 
@@ -22,6 +23,7 @@ Texture2D testingAtom;
 int currentAtomTraceSection = 0;
 
 bool gameWon = false;
+bool quitGame = false;
 
 Vector2 gravitonPosition = (Vector2){512, (512)};
 Vector2 atomPosition = (Vector2){255, 255};
@@ -67,15 +69,33 @@ void InitGame() {
         buttons[i].textOffset = 8;
         buttons[i].activeState = NONE;
     }
+
     strcpy(buttons[0].text, "Start");
     buttons[0].rect = (Rectangle){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64, 256, 128};
     buttons[0].textOffset = 32;
     buttons[0].activeState = GAME_START;
 
-    strcpy(buttons[1].text, "Home");
-    buttons[1].rect = (Rectangle){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64, 256, 128};
-    buttons[1].textOffset = 32;
-    buttons[1].activeState = GAME_END;
+    strcpy(buttons[1].text, "Exit");
+    buttons[1].textColor = GRAV_LGRAY;
+    buttons[1].rect = (Rectangle){WINDOW_WIDTH - 80, 16, 64, 32};
+    buttons[1].activeState = GAME_START;
+
+    strcpy(buttons[2].text, "Levels");
+    buttons[2].rect = (Rectangle){64, WINDOW_HIGHT / 2, 256, 64};
+    buttons[2].activeState = GAME_START;
+
+    strcpy(buttons[3].text, "Cosmetics");
+    buttons[3].rect = (Rectangle){64, (WINDOW_HIGHT / 2) + 128, 256, 64};
+    buttons[3].activeState = GAME_START;
+
+    strcpy(buttons[4].text, "Settings");
+    buttons[4].rect = (Rectangle){64, (WINDOW_HIGHT / 2) + 256, 256, 64};
+    buttons[4].activeState = GAME_START;
+
+    strcpy(buttons[5].text, "Home");
+    buttons[5].rect = (Rectangle){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64, 256, 128};
+    buttons[5].textOffset = 32;
+    buttons[5].activeState = GAME_END;
 }
 
 void ResetGame() {
@@ -98,9 +118,21 @@ void MouseLogic() {
         if (CheckCollisionPointRec(GetMousePosition(), buttons[0].rect)) {
             gameState = GAME_PLAY;
         }
+        if (CheckCollisionPointRec(GetMousePosition(), buttons[1].rect)) {
+            quitGame = true;
+        }
+        if (CheckCollisionPointRec(GetMousePosition(), buttons[2].rect)) {
+//levels menu
+        }
+        if (CheckCollisionPointRec(GetMousePosition(), buttons[3].rect)) {
+//cosmetics menu
+        }
+        if (CheckCollisionPointRec(GetMousePosition(), buttons[4].rect)) {
+//settings menu
+        }
     }
     if (gameState == GAME_END) {
-        if (CheckCollisionPointRec(GetMousePosition(), buttons[1].rect)) {
+        if (CheckCollisionPointRec(GetMousePosition(), buttons[5].rect)) {
             gameState = GAME_START;
             ResetGame();
         }
@@ -216,7 +248,7 @@ int main(void) {
 
     InitGame();
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && (quitGame == false)) {
         Update();
         Draw();
     }
