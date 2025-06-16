@@ -20,6 +20,8 @@ Texture2D testingAtom;
 
 int currentAtomTraceSection = 0;
 
+bool gameWon = false;
+
 Vector2 gravitonPosition = (Vector2){512, (512)};
 Vector2 atomPosition = (Vector2){255, 255};
 Vector2 atomSpeed = (Vector2){0, 0};
@@ -27,13 +29,11 @@ Vector2 atomForce = (Vector2){0, 0};
 
 Rectangle finishBox = (Rectangle){1400, 800, 64, 64};
 Rectangle obstacleBox = (Rectangle){(WINDOW_WIDTH / 2), 0, 64, WINDOW_HIGHT};
-Rectangle startButtonRectangle = (Rectangle){((WINDOW_WIDTH / 2) - 128), ((WINDOW_HIGHT / 2) - 64), 256, 128};
 
 enum GameState {
     GAME_START,
     GAME_PLAY,
-    GAME_WON,
-    GAME_LOST,
+    GAME_END,
     NONE
 };
 enum GameState gameState = GAME_START;
@@ -42,8 +42,7 @@ struct Button {
     char text[16];
     Color rectColor;
     Color textColor;
-    Vector2 position;
-    Vector2 size;
+    Rectangle rect;
     int textOffset;
     enum GameState activeState;
 };
@@ -63,16 +62,19 @@ void InitGame() {
         strcpy(buttons[i].text, "test text");
         buttons[i].rectColor = GRAV_DGRAY;
         buttons[i].textColor = GRAV_WHITE;
-        buttons[i].position = (Vector2){0, 0};
-        buttons[i].size = (Vector2){256, 64};
+        buttons[i].rect = (Rectangle){0, 0, 256, 64};
         buttons[i].textOffset = 8;
         buttons[i].activeState = NONE;
     }
     strcpy(buttons[0].text, "Start");
-    buttons[0].position = (Vector2){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64};
-    buttons[0].size = (Vector2){256, 128};
+    buttons[0].rect = (Rectangle){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64, 256, 128};
     buttons[0].textOffset = 32;
     buttons[0].activeState = GAME_START;
+
+    strcpy(buttons[1].text, "Home");
+    buttons[1].rect = (Rectangle){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64, 256, 128};
+    buttons[1].textOffset = 32;
+    buttons[1].activeState = GAME_END;
 }
 
 void MouseLogic() {
@@ -81,9 +83,14 @@ void MouseLogic() {
             gravitonPosition = GetMousePosition();
         }
     }
-    if (gameState == GAME_START || gameState == GAME_LOST || gameState == GAME_WON) {
-        if (CheckCollisionPointRec(GetMousePosition(), startButtonRectangle)) {
+    if (gameState == GAME_START) {
+        if (CheckCollisionPointRec(GetMousePosition(), buttons[0].rect)) {
             gameState = GAME_PLAY;
+        }
+    }
+    if (gameState == GAME_END) {
+        if (CheckCollisionPointRec(GetMousePosition(), buttons[1].rect)) {
+            gameState = GAME_START;
         }
     }
 }
@@ -112,11 +119,13 @@ void UpdateAtomTrace() {
 
 void AtomCollision() {
     if (CheckCollisionPointRec(atomPosition, finishBox)) {
-        gameState = GAME_WON;
+        gameState = GAME_END;
+        gameWon = true;
         ResetGame();
     }
     if (CheckCollisionPointRec(atomPosition, obstacleBox)) {
-        gameState = GAME_LOST;
+        gameState = GAME_END;
+        gameWon = false;
         ResetGame();
     }
 }
@@ -136,7 +145,7 @@ void Update() {
     if (gameState == GAME_PLAY) {
         UpdateAtom();
     }
-    if (gameState == GAME_LOST || gameState == GAME_WON) {
+    if (gameState == GAME_END) {
     }
     if (gameState == GAME_START) {
     }
@@ -146,8 +155,8 @@ void DrawUi(enum GameState state) {
     int i = 0;
     for (i = 0; i < 16; i++) {
         if (buttons[i].activeState == state) {
-            DrawRectangleV(buttons[i].position, buttons[i].size, buttons[i].rectColor);
-            DrawText(buttons[i].text, (buttons[i].position.x + buttons[i].textOffset), (buttons[i].position.y + buttons[i].textOffset), (buttons[i].size.y - (2 * buttons[i].textOffset)), buttons[i].textColor);
+            DrawRectangleRec(buttons[i].rect, buttons[i].rectColor);
+            DrawText(buttons[i].text, (buttons[i].rect.x + buttons[i].textOffset), (buttons[i].rect.y + buttons[i].textOffset), (buttons[i].rect.height - (2 * buttons[i].textOffset)), buttons[i].textColor);
         }
     }
 }
@@ -188,13 +197,14 @@ void Draw() {
             DrawAtom();
             DrawGraviton();
         }
-        if (gameState == GAME_WON) {
+        if (gameState == GAME_END) {
             ClearBackground(GRAV_BLACK);
-            DrawText("You Won!", 512, 256, 64, GRAV_WHITE);
-        }
-        if (gameState == GAME_LOST) {
-            ClearBackground(GRAV_BLACK);
-            DrawText("You Lost!", 512, 256, 64, GRAV_WHITE);
+            if (gameWon == true) {
+                DrawText("You Won!", 512, 256, 64, GRAV_WHITE);
+            }
+            if (gameWon == false) {
+                DrawText("You Lost!", 512, 256, 64, GRAV_WHITE);
+            }
         }
     EndDrawing();
 }
