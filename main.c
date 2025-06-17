@@ -279,6 +279,7 @@ int main(void) {
     SetTargetFPS(FPS);
 
     InitGame();
+    InitLevel();
 
     while (!WindowShouldClose() && (quitGame == false)) {
         Update();
