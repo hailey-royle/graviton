@@ -250,6 +250,7 @@ void DrawUi() {
     if (gameState == GAME_START) {
         DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
     }
+
     for (int i = 0; i < BUTTONS_NUMBER; i++) {
         if (buttons[i].activeState == gameState) {
             DrawRectangleRec(buttons[i].rect, buttons[i].rectColor);
@@ -267,6 +268,7 @@ void Draw() {
 }
 
 int main(void) {
+
     InitWindow(WINDOW_WIDTH, WINDOW_HIGHT, "graviton");
 
     testingGraviton = LoadTexture("assets/TestingGraviton.png");
