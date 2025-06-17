@@ -241,7 +241,6 @@ void DrawUi(enum GameState state) {
     }
 }
 
-
 void Draw() {
     BeginDrawing();
         if (gameState == GAME_PLAY) {
@@ -252,6 +251,7 @@ void Draw() {
         }
         if (gameState == GAME_START) {
             ClearBackground(GRAV_BLACK);
+            DrawLevel();
             DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
         }
         if (gameState == GAME_END) {
