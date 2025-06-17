@@ -31,14 +31,10 @@ char charGravitonMoves[16];
 bool gameWon = false;
 bool quitGame = false;
 
-Vector2 gravitonPosition = (Vector2){512, 512};
-Vector2 atomPosition = (Vector2){800, 800};
+Vector2 gravitonPosition = (Vector2){0, 0};
+Vector2 atomPosition = (Vector2){0, 0};
 Vector2 atomSpeed = (Vector2){0, 0};
 Vector2 atomForce = (Vector2){0, 0};
-
-Rectangle finishBox = (Rectangle){(WINDOW_WIDTH / 2) - 32, 600, 64, 64};
-Rectangle obstacleBox = (Rectangle){(WINDOW_WIDTH / 2) - 128, 264, 64, 800};
-Rectangle obstacleBox2 = (Rectangle){(WINDOW_WIDTH / 2) + 128, 264, 64, 800};
 
 enum GameState {
     GAME_START,
@@ -66,6 +62,15 @@ struct AtomTraceSection {
 };
 
 struct AtomTraceSection atomTrace[FPS];
+
+struct Level {
+    Rectangle obstacles[16];
+    Rectangle finish;
+    Vector2 gravitonStart;
+    Vector2 atomStart;
+};
+
+struct Level level;
 
 void InitGame() {
     for (int i = 0; i < BUTTONS_NUMBER; i++) {
@@ -105,14 +110,22 @@ void InitGame() {
     buttons[5].activeState = GAME_END;
 }
 
-void ResetGame() {
-    gravitonPosition = (Vector2){512, 512};
-    atomPosition = (Vector2){800, 800};
+void InitLevel() {
+    level.obstacles[0] = (Rectangle){0, 0, 1920, 64};
+    level.obstacles[1] = (Rectangle){0, 0, 64, 1080};
+    level.obstacles[2] = (Rectangle){256, 256, 960, 64};
+    level.obstacles[3] = (Rectangle){256, 256, 64, 540};
+    level.finish = (Rectangle){64, 64, 64, 64};
+    level.gravitonStart = (Vector2){960 + 256, 540 + 256};
+    level.atomStart = (Vector2){860, 440};
+
+    gravitonPosition = level.gravitonStart;
+    atomPosition = level.atomStart;
     atomSpeed = (Vector2){0, 0};
     atomForce = (Vector2){0, 0};
     timer = 0.0;
     gravitonMoves = 0;
-    for (int i = 0; i <= FPS; i += 1) {
+    for (int i = 0; i < FPS; i++) {
          atomTrace[i].active = false;
     }
 }
@@ -127,6 +140,7 @@ void MouseLogic() {
     if (gameState == GAME_START) {
         if (CheckCollisionPointRec(GetMousePosition(), buttons[0].rect)) {
             gameState = GAME_PLAY;
+            InitLevel();
         }
         if (CheckCollisionPointRec(GetMousePosition(), buttons[1].rect)) {
             quitGame = true;
@@ -144,7 +158,6 @@ void MouseLogic() {
     if (gameState == GAME_END) {
         if (CheckCollisionPointRec(GetMousePosition(), buttons[5].rect)) {
             gameState = GAME_START;
-            ResetGame();
         }
     }
 }
@@ -161,13 +174,15 @@ void UpdateAtomTrace() {
 }
 
 void AtomCollision() {
-    if (CheckCollisionPointRec(atomPosition, finishBox)) {
+    if (CheckCollisionPointRec(atomPosition, level.finish)) {
         gameState = GAME_END;
         gameWon = true;
     }
-    if (CheckCollisionPointRec(atomPosition, obstacleBox2) || CheckCollisionPointRec(atomPosition, obstacleBox)) {
-        gameState = GAME_END;
-        gameWon = false;
+    for (int i = 0; i < 16; i++) {
+        if (CheckCollisionPointRec(atomPosition, level.obstacles[i])) {
+            gameState = GAME_END;
+            gameWon = false;
+        }
     }
 }
 
@@ -191,10 +206,6 @@ void Update() {
         UpdateAtom();
         UpdateTimer();
     }
-    if (gameState == GAME_END) {
-    }
-    if (gameState == GAME_START) {
-    }
 }
 
 void DrawUi(enum GameState state) {
@@ -208,11 +219,12 @@ void DrawUi(enum GameState state) {
 
 void DrawLevel() {
     //map
-    DrawRectangleLinesEx(finishBox, 4.0, GRAV_BLUE);
-    DrawRectangleLinesEx(obstacleBox, 4.0, GRAV_RED);
-    DrawRectangleLinesEx(obstacleBox2, 4.0, GRAV_RED);
+    DrawRectangleLinesEx(level.finish, 4.0, GRAV_BLUE);
+    for (int i = 0; i < 16; i++) {
+        DrawRectangleLinesEx(level.obstacles[i], 4, GRAV_RED);
+    }
     //atom trace
-    for (int i = 0; i <= FPS; i += 1) {
+    for (int i = 0; i <= FPS; i++) {
          if (atomTrace[i].active == true) {
             DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
          }
