@@ -227,14 +227,31 @@ void DrawTimer() {
     DrawText(charTimer, WINDOW_WIDTH - 128, 32, 32, GRAV_WHITE);
 }
 
-void DrawGravitonMoves() {
+void DrawMoves() {
     sprintf(charGravitonMoves, "%d", gravitonMoves);
     DrawText(charGravitonMoves, WINDOW_WIDTH - 128, 96, 32, GRAV_WHITE);
 }
 
-void DrawUi(enum GameState state) {
+void DrawUi() {
+    if (gameState == GAME_END) {
+        DrawTimer();
+        DrawMoves();
+        if (gameWon == true) {
+            DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
+        }
+        if (gameWon == false) {
+            DrawText("You Lost!", 64, 64, 128, GRAV_WHITE);
+        }
+    }
+    if (gameState == GAME_PLAY) {
+        DrawTimer();
+        DrawMoves();
+    }
+    if (gameState == GAME_START) {
+        DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
+    }
     for (int i = 0; i < BUTTONS_NUMBER; i++) {
-        if (buttons[i].activeState == state) {
+        if (buttons[i].activeState == gameState) {
             DrawRectangleRec(buttons[i].rect, buttons[i].rectColor);
             DrawText(buttons[i].text, (buttons[i].rect.x + buttons[i].textOffset), (buttons[i].rect.y + buttons[i].textOffset), (buttons[i].rect.height - (2 * buttons[i].textOffset)), buttons[i].textColor);
         }
@@ -243,30 +260,9 @@ void DrawUi(enum GameState state) {
 
 void Draw() {
     BeginDrawing();
-        if (gameState == GAME_PLAY) {
-            ClearBackground(GRAV_BLACK);
-            DrawLevel();
-            DrawTimer();
-            DrawGravitonMoves();
-        }
-        if (gameState == GAME_START) {
-            ClearBackground(GRAV_BLACK);
-            DrawLevel();
-            DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
-        }
-        if (gameState == GAME_END) {
-            ClearBackground(GRAV_BLACK);
-            DrawLevel();
-            DrawTimer();
-            DrawGravitonMoves();
-            if (gameWon == true) {
-                DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
-            }
-            if (gameWon == false) {
-                DrawText("You Lost!", 64, 64, 128, GRAV_WHITE);
-            }
-        }
-        DrawUi(gameState);
+        ClearBackground(GRAV_BLACK);
+        DrawLevel();
+        DrawUi();
     EndDrawing();
 }
 
