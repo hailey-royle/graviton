@@ -206,26 +206,20 @@ void DrawUi(enum GameState state) {
     }
 }
 
-void DrawMap() {
+void DrawLevel() {
+    //map
     DrawRectangleLinesEx(finishBox, 4.0, GRAV_BLUE);
     DrawRectangleLinesEx(obstacleBox, 4.0, GRAV_RED);
     DrawRectangleLinesEx(obstacleBox2, 4.0, GRAV_RED);
-}
-
-void DrawAtomTrace() {
+    //atom trace
     for (int i = 0; i <= FPS; i += 1) {
          if (atomTrace[i].active == true) {
             DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
          }
     }
-}
-
-void DrawAtom() {
-    DrawAtomTrace();
+    //atom
     DrawTextureV(testingAtom, Vector2SubtractValue(atomPosition, HALF_SPRITE_WH), GRAV_WHITE);
-}
-
-void DrawGraviton() {
+    //graviton
     DrawTextureV(testingGraviton, Vector2SubtractValue(gravitonPosition, HALF_SPRITE_WH), GRAV_WHITE);
 }
 
@@ -243,9 +237,7 @@ void Draw() {
     BeginDrawing();
         if (gameState == GAME_PLAY) {
             ClearBackground(GRAV_BLACK);
-            DrawMap();
-            DrawAtom();
-            DrawGraviton();
+            DrawLevel();
             DrawTimer();
             DrawGravitonMoves();
         }
@@ -255,9 +247,7 @@ void Draw() {
         }
         if (gameState == GAME_END) {
             ClearBackground(GRAV_BLACK);
-            DrawMap();
-            DrawAtom();
-            DrawGraviton();
+            DrawLevel();
             DrawTimer();
             DrawGravitonMoves();
             if (gameWon == true) {
