@@ -194,17 +194,13 @@ void UpdateAtom() {
     AtomCollision();
 }
 
-void UpdateTimer() {
-    timer += GetFrameTime();
-}
-
 void Update() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         MouseLogic();
     }
     if (gameState == GAME_PLAY) {
         UpdateAtom();
-        UpdateTimer();
+        timer += GetFrameTime();
     }
 }
 
