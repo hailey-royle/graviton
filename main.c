@@ -204,15 +204,6 @@ void Update() {
     }
 }
 
-void DrawUi(enum GameState state) {
-    for (int i = 0; i < BUTTONS_NUMBER; i++) {
-        if (buttons[i].activeState == state) {
-            DrawRectangleRec(buttons[i].rect, buttons[i].rectColor);
-            DrawText(buttons[i].text, (buttons[i].rect.x + buttons[i].textOffset), (buttons[i].rect.y + buttons[i].textOffset), (buttons[i].rect.height - (2 * buttons[i].textOffset)), buttons[i].textColor);
-        }
-    }
-}
-
 void DrawLevel() {
     //map
     DrawRectangleLinesEx(level.finish, 4.0, GRAV_BLUE);
@@ -240,6 +231,16 @@ void DrawGravitonMoves() {
     sprintf(charGravitonMoves, "%d", gravitonMoves);
     DrawText(charGravitonMoves, WINDOW_WIDTH - 128, 96, 32, GRAV_WHITE);
 }
+
+void DrawUi(enum GameState state) {
+    for (int i = 0; i < BUTTONS_NUMBER; i++) {
+        if (buttons[i].activeState == state) {
+            DrawRectangleRec(buttons[i].rect, buttons[i].rectColor);
+            DrawText(buttons[i].text, (buttons[i].rect.x + buttons[i].textOffset), (buttons[i].rect.y + buttons[i].textOffset), (buttons[i].rect.height - (2 * buttons[i].textOffset)), buttons[i].textColor);
+        }
+    }
+}
+
 
 void Draw() {
     BeginDrawing();
