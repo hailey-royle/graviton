@@ -1,6 +1,5 @@
 #include <raylib.h>
 #include <raymath.h>
-#include <string.h>
 #include <stdio.h>
 
 #define WINDOW_WIDTH 1920
@@ -44,23 +43,11 @@ enum GameState {
 };
 enum GameState gameState = GAME_START;
 
-struct Button {
-    char text[16];
-    Color rectColor;
-    Color textColor;
-    Rectangle rect;
-    int textOffset;
-    enum GameState activeState;
-};
-
-struct Button buttons[BUTTONS_NUMBER];
-
 struct AtomTraceSection {
     Vector2 start;
     Vector2 end;
     bool active;
 };
-
 struct AtomTraceSection atomTrace[FPS];
 
 struct Level {
@@ -69,45 +56,15 @@ struct Level {
     Vector2 gravitonStart;
     Vector2 atomStart;
 };
-
 struct Level level;
 
 void InitGame() {
-    for (int i = 0; i < BUTTONS_NUMBER; i++) {
-        strcpy(buttons[i].text, "test text");
-        buttons[i].rectColor = GRAV_DGRAY;
-        buttons[i].textColor = GRAV_WHITE;
-        buttons[i].rect = (Rectangle){0, 0, 256, 64};
-        buttons[i].textOffset = 8;
-        buttons[i].activeState = NONE;
-    }
+    InitWindow(WINDOW_WIDTH, WINDOW_HIGHT, "graviton");
 
-    strcpy(buttons[0].text, "Start");
-    buttons[0].rect = (Rectangle){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64, 256, 128};
-    buttons[0].textOffset = 32;
-    buttons[0].activeState = GAME_START;
+    testingGraviton = LoadTexture("assets/TestingGraviton.png");
+    testingAtom = LoadTexture("assets/TestingAtom.png");
 
-    strcpy(buttons[1].text, "Exit");
-    buttons[1].textColor = GRAV_LGRAY;
-    buttons[1].rect = (Rectangle){WINDOW_WIDTH - 80, 16, 64, 32};
-    buttons[1].activeState = GAME_START;
-
-    strcpy(buttons[2].text, "Levels");
-    buttons[2].rect = (Rectangle){64, WINDOW_HIGHT / 2, 256, 64};
-    buttons[2].activeState = GAME_START;
-
-    strcpy(buttons[3].text, "Cosmetics");
-    buttons[3].rect = (Rectangle){64, (WINDOW_HIGHT / 2) + 128, 256, 64};
-    buttons[3].activeState = GAME_START;
-
-    strcpy(buttons[4].text, "Settings");
-    buttons[4].rect = (Rectangle){64, (WINDOW_HIGHT / 2) + 256, 256, 64};
-    buttons[4].activeState = GAME_START;
-
-    strcpy(buttons[5].text, "Home");
-    buttons[5].rect = (Rectangle){(WINDOW_WIDTH / 2) - 128, (WINDOW_HIGHT / 2) - 64, 256, 128};
-    buttons[5].textOffset = 32;
-    buttons[5].activeState = GAME_END;
+    SetTargetFPS(FPS);
 }
 
 void InitLevel() {
@@ -130,35 +87,13 @@ void InitLevel() {
     }
 }
 
-void MouseLogic() {
-    if (gameState == GAME_PLAY) {
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            gravitonPosition = GetMousePosition();
-            gravitonMoves++;
-        }
-    }
-    if (gameState == GAME_START) {
-        if (CheckCollisionPointRec(GetMousePosition(), buttons[0].rect)) {
-            gameState = GAME_PLAY;
-            InitLevel();
-        }
-        if (CheckCollisionPointRec(GetMousePosition(), buttons[1].rect)) {
-            quitGame = true;
-        }
-        if (CheckCollisionPointRec(GetMousePosition(), buttons[2].rect)) {
-//levels menu
-        }
-        if (CheckCollisionPointRec(GetMousePosition(), buttons[3].rect)) {
-//cosmetics menu
-        }
-        if (CheckCollisionPointRec(GetMousePosition(), buttons[4].rect)) {
-//settings menu
-        }
-    }
-    if (gameState == GAME_END) {
-        if (CheckCollisionPointRec(GetMousePosition(), buttons[5].rect)) {
-            gameState = GAME_START;
-        }
+bool Button(const Rectangle rect, const char *text) {
+    DrawRectangleRec(rect, GRAV_DGRAY);
+    DrawText(text, rect.x + (rect.height / 8), rect.y + (rect.height / 8), rect.height - (rect.height / 4), GRAV_WHITE);
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), rect)) {
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -195,12 +130,14 @@ void UpdateAtom() {
 }
 
 void Update() {
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        MouseLogic();
-    }
     if (gameState == GAME_PLAY) {
         UpdateAtom();
         timer += GetFrameTime();
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            gravitonPosition = GetMousePosition();
+            gravitonMoves++;
+        }
     }
 }
 
@@ -233,7 +170,29 @@ void DrawMoves() {
 }
 
 void DrawUi() {
-    if (gameState == GAME_END) {
+    if (gameState == GAME_START) {
+        DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
+
+        if (Button((Rectangle){(WINDOW_WIDTH / 2) - 192, (WINDOW_HIGHT / 2) - 64, 384, 128}, "Start")) {
+            InitLevel();
+            gameState = GAME_PLAY;
+        }
+        if (Button((Rectangle){WINDOW_WIDTH - 80, 16, 64, 32}, "Exit")) {
+            quitGame = true;
+        }
+        if (Button((Rectangle){64, WINDOW_HIGHT / 2, 256, 64}, "Levels")) {
+            //levels
+        }
+        if (Button((Rectangle){64, (WINDOW_HIGHT / 2) + 128, 256, 64}, "Cosmetics")) {
+            //cosmetics
+        }
+        if (Button((Rectangle){64, (WINDOW_HIGHT / 2) + 256, 256, 64}, "Settings")) {
+            //settings
+        }
+    } else if (gameState == GAME_PLAY) {
+        DrawTimer();
+        DrawMoves();
+    } else if (gameState == GAME_END) {
         DrawTimer();
         DrawMoves();
         if (gameWon == true) {
@@ -242,19 +201,9 @@ void DrawUi() {
         if (gameWon == false) {
             DrawText("You Lost!", 64, 64, 128, GRAV_WHITE);
         }
-    }
-    if (gameState == GAME_PLAY) {
-        DrawTimer();
-        DrawMoves();
-    }
-    if (gameState == GAME_START) {
-        DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
-    }
 
-    for (int i = 0; i < BUTTONS_NUMBER; i++) {
-        if (buttons[i].activeState == gameState) {
-            DrawRectangleRec(buttons[i].rect, buttons[i].rectColor);
-            DrawText(buttons[i].text, (buttons[i].rect.x + buttons[i].textOffset), (buttons[i].rect.y + buttons[i].textOffset), (buttons[i].rect.height - (2 * buttons[i].textOffset)), buttons[i].textColor);
+        if (Button((Rectangle){(WINDOW_WIDTH / 2) - 192, (WINDOW_HIGHT / 2) - 64, 384, 128}, "Home")) {
+            gameState = GAME_START;
         }
     }
 }
@@ -269,14 +218,8 @@ void Draw() {
 
 int main(void) {
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HIGHT, "graviton");
-
-    testingGraviton = LoadTexture("assets/TestingGraviton.png");
-    testingAtom = LoadTexture("assets/TestingAtom.png");
-
-    SetTargetFPS(FPS);
-
     InitGame();
+
     InitLevel();
 
     while (!WindowShouldClose() && (quitGame == false)) {
