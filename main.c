@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #define WINDOW_WIDTH 1920
@@ -64,9 +65,12 @@ struct AtomTraceSection atomTrace[FPS];
 
 struct Level {
     Rectangle obstacles[16];
+    char name[64];
+    char designer[64];
     Rectangle finish;
     Vector2 gravitonStart;
     Vector2 atomStart;
+    int difficulty;
 };
 struct Level level;
 
@@ -80,13 +84,77 @@ void InitGame() {
 }
 
 void InitLevel() {
-    level.obstacles[0] = (Rectangle){0, 0, 1920, 64};
-    level.obstacles[1] = (Rectangle){0, 0, 64, 1080};
-    level.obstacles[2] = (Rectangle){256, 256, 960, 64};
-    level.obstacles[3] = (Rectangle){256, 256, 64, 540};
-    level.finish = (Rectangle){64, 64, 64, 64};
-    level.gravitonStart = (Vector2){960 + 256, 540 + 256};
-    level.atomStart = (Vector2){860, 440};
+    FILE *levelFile;
+    levelFile = fopen("a", "r");
+    char levelData[64];
+    while (fgets(levelData, 64, levelFile)) {
+        char istr[4];
+        if (levelData[0] == "#") {
+            for (int i = 0; i < 64; i++) {
+                levelData[i + 1] = level.name[i];
+            }
+        } else if (levelData[0] == "@") {
+            for (int i = 0; i < 64; i++) {
+                levelData[i + 1] = level.designer[i];
+            }
+        } else if (levelData[0] == "d") {
+            if (levelData[1] == "0") {
+                level.difficulty = 0;
+            } else if (levelData[1] == "1") {
+                level.difficulty = 1;
+            } else if (levelData[2] == "2") {
+                level.difficulty = 2;
+            } else if (levelData[3] == "3") {
+                level.difficulty = 3;
+            }
+        } else if (levelData[0] == "o") {
+            for (int i = 1; i < 4; i++) {
+                levelData[i + 1] = istr[i];
+            }
+            level.obstacels[i].x = strtof(istr, NULL);
+            for (int i = 1; i < 4; i++) {
+                levelData[i + 5] = istr[i];
+            }
+            level.obstacels[i].y = strtof(istr, NULL);
+            for (int i = 1; i < 4; i++) {
+                levelData[i + 9] = istr[i];
+            }
+            level.obstacels[i].width = strtof(istr, NULL);
+            for (int i = 1; i < 4; i++) {
+                levelData[i + 13] = istr[i];
+            }
+            level.obstacels[i].height = strtof(istr, NULL);
+        } else if (levelData[0] == "g") {
+            for (int i = 1; i < 4; i++) {
+                levelData[i + 1] = istr[i];
+            }
+            level.gravitonStart.x = strtof(istr, NULL);
+            for (int i = 1; i < 4; i++) {
+                levelData[i + 5] = istr[i];
+            }
+            level.gravitonStart.y = strtof(istr, NULL);
+        }
+        } else if (levelData[0] == "a") {
+            for (int i = 1; i < 4; i++) {
+                levelData[i + 1] = istr[i];
+            }
+            level.atomStart.x = strtof(istr, NULL);
+            for (int i = 1; i < 4; i++) {
+                levelData[i + 5] = istr[i];
+            }
+            level.atomStart.y = strtof(istr, NULL);
+        }
+
+    }
+    fclose(levelFile);
+
+//    level.obstacles[0] = (Rectangle){0, 0, 1920, 64};
+//    level.obstacles[1] = (Rectangle){0, 0, 64, 1080};
+//    level.obstacles[2] = (Rectangle){256, 256, 960, 64};
+//    level.obstacles[3] = (Rectangle){256, 256, 64, 540};
+//    level.finish = (Rectangle){64, 64, 64, 64};
+//    level.gravitonStart = (Vector2){960 + 256, 540 + 256};
+//    level.atomStart = (Vector2){860, 440};
 
     gravitonPosition = level.gravitonStart;
     atomPosition = level.atomStart;
