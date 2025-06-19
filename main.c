@@ -37,11 +37,23 @@ Vector2 atomForce = (Vector2){0, 0};
 
 enum GameState {
     GAME_START,
+    GAME_LEVELS,
+    GAME_COSMETICS,
+    GAME_SETTINGS,
     GAME_PLAY,
-    GAME_END,
-    NONE
+    GAME_END
 };
 enum GameState gameState = GAME_START;
+
+struct LevelSelection {
+    bool easy;
+    bool medium;
+    bool hard;
+    bool hell;
+    bool atempted;
+    bool finished;
+};
+struct LevelSelection levelSelection;
 
 struct AtomTraceSection {
     Vector2 start;
@@ -94,6 +106,21 @@ bool Button(const Rectangle rect, const char *text) {
         return true;
     } else {
         return false;
+    }
+}
+
+void ToggleButton(const Rectangle rect, bool *toggle, const char *text) {
+    if (Button(rect, text)) {
+        if (*toggle == true) {
+            *toggle = false;
+        } else {
+            *toggle = true;
+        }
+    }
+    if (*toggle == true) {
+        DrawText("[X]", rect.x + (rect.width - 48), rect.y + 8, (rect.height * 2) / 3, GRAV_WHITE);
+    } else {
+        DrawText("[ ]", rect.x + (rect.width - 48), rect.y + 8, (rect.height * 2) / 3, GRAV_WHITE);
     }
 }
 
@@ -173,15 +200,15 @@ void DrawUi() {
     if (gameState == GAME_START) {
         DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
 
+        if (Button((Rectangle){WINDOW_WIDTH - 112, 16, 96, 48}, "Exit")) {
+            quitGame = true;
+        }
         if (Button((Rectangle){(WINDOW_WIDTH / 2) - 192, (WINDOW_HIGHT / 2) - 64, 384, 128}, "Start")) {
             InitLevel();
             gameState = GAME_PLAY;
         }
-        if (Button((Rectangle){WINDOW_WIDTH - 80, 16, 64, 32}, "Exit")) {
-            quitGame = true;
-        }
         if (Button((Rectangle){64, WINDOW_HIGHT / 2, 256, 64}, "Levels")) {
-            //levels
+            gameState = GAME_LEVELS;
         }
         if (Button((Rectangle){64, (WINDOW_HIGHT / 2) + 128, 256, 64}, "Cosmetics")) {
             //cosmetics
@@ -189,12 +216,24 @@ void DrawUi() {
         if (Button((Rectangle){64, (WINDOW_HIGHT / 2) + 256, 256, 64}, "Settings")) {
             //settings
         }
+    } else if (gameState == GAME_LEVELS) {
+        if (Button((Rectangle){WINDOW_WIDTH - 112, 16, 96, 48}, "Exit")) {
+            quitGame = true;
+        }
+        DrawText("Filters", 72, 72, 48, GRAV_WHITE);
+        ToggleButton((Rectangle){64, 128, 256, 48}, &levelSelection.easy, "Easy");
+        ToggleButton((Rectangle){64, 192, 256, 48}, &levelSelection.medium, "Medium");
+        ToggleButton((Rectangle){64, 256, 256, 48}, &levelSelection.hard, "Hard");
+        ToggleButton((Rectangle){64, 320, 256, 48}, &levelSelection.hell, "Hell");
+        ToggleButton((Rectangle){64, 384, 256, 48}, &levelSelection.atempted, "Atempted");
+        ToggleButton((Rectangle){64, 448, 256, 48}, &levelSelection.finished, "Finished");
     } else if (gameState == GAME_PLAY) {
         DrawTimer();
         DrawMoves();
     } else if (gameState == GAME_END) {
         DrawTimer();
         DrawMoves();
+
         if (gameWon == true) {
             DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
         }
