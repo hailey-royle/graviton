@@ -85,76 +85,87 @@ void InitGame() {
 
 void InitLevel() {
     FILE *levelFile;
-    levelFile = fopen("a", "r");
+    levelFile = fopen("./levels/a", "r");
     char levelData[64];
+    char levelDataTypes[12] = { "!@dofga0123" };
+    int obstaclesNumber = 0;
     while (fgets(levelData, 64, levelFile)) {
-        char istr[4];
-        if (levelData[0] == "#") {
-            for (int i = 0; i < 64; i++) {
-                levelData[i + 1] = level.name[i];
+        char istr[5] = {"0100"};
+        if (levelData[0] == levelDataTypes[0]) {
+            for (int i = 0; i < 62; i++) {
+                level.name[i] = levelData[i + 1];
             }
-        } else if (levelData[0] == "@") {
-            for (int i = 0; i < 64; i++) {
-                levelData[i + 1] = level.designer[i];
+        } else if (levelData[0] == levelDataTypes[1]) {
+            for (int i = 0; i < 62; i++) {
+                level.designer[i] = levelData[i + 1];
             }
-        } else if (levelData[0] == "d") {
-            if (levelData[1] == "0") {
+        } else if (levelData[0] == levelDataTypes[2]) {
+            if (levelData[1] == levelDataTypes[7]) {
                 level.difficulty = 0;
-            } else if (levelData[1] == "1") {
+            } else if (levelData[1] == levelDataTypes[8]) {
                 level.difficulty = 1;
-            } else if (levelData[2] == "2") {
+            } else if (levelData[2] == levelDataTypes[9]) {
                 level.difficulty = 2;
-            } else if (levelData[3] == "3") {
+            } else if (levelData[3] == levelDataTypes[10]) {
                 level.difficulty = 3;
             }
-        } else if (levelData[0] == "o") {
-            for (int i = 1; i < 4; i++) {
-                levelData[i + 1] = istr[i];
+        } else if (levelData[0] == levelDataTypes[3]) {
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 1];
             }
-            level.obstacels[i].x = strtof(istr, NULL);
-            for (int i = 1; i < 4; i++) {
-                levelData[i + 5] = istr[i];
+            level.obstacles[obstaclesNumber].x = strtof(istr, NULL);
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 5];
             }
-            level.obstacels[i].y = strtof(istr, NULL);
-            for (int i = 1; i < 4; i++) {
-                levelData[i + 9] = istr[i];
+            level.obstacles[obstaclesNumber].y = strtof(istr, NULL);
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 9];
             }
-            level.obstacels[i].width = strtof(istr, NULL);
-            for (int i = 1; i < 4; i++) {
-                levelData[i + 13] = istr[i];
+            level.obstacles[obstaclesNumber].width = strtof(istr, NULL);
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 13];
             }
-            level.obstacels[i].height = strtof(istr, NULL);
-        } else if (levelData[0] == "g") {
-            for (int i = 1; i < 4; i++) {
-                levelData[i + 1] = istr[i];
+            level.obstacles[obstaclesNumber].height = strtof(istr, NULL);
+            obstaclesNumber++;
+        } else if (levelData[0] == levelDataTypes[4]) {
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 1];
+            }
+            level.finish.x = strtof(istr, NULL);
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 5];
+            }
+            level.finish.y = strtof(istr, NULL);
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 9];
+            }
+            level.finish.width = strtof(istr, NULL);
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 13];
+            }
+            level.finish.height = strtof(istr, NULL);
+        } else if (levelData[0] == levelDataTypes[5]) {
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 1];
             }
             level.gravitonStart.x = strtof(istr, NULL);
-            for (int i = 1; i < 4; i++) {
-                levelData[i + 5] = istr[i];
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 5];
             }
             level.gravitonStart.y = strtof(istr, NULL);
-        }
-        } else if (levelData[0] == "a") {
-            for (int i = 1; i < 4; i++) {
-                levelData[i + 1] = istr[i];
+        } else if (levelData[0] == levelDataTypes[6]) {
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 1];
             }
             level.atomStart.x = strtof(istr, NULL);
-            for (int i = 1; i < 4; i++) {
-                levelData[i + 5] = istr[i];
+            for (int i = 0; i < 4; i++) {
+                istr[i] = levelData[i + 5];
             }
             level.atomStart.y = strtof(istr, NULL);
         }
 
     }
     fclose(levelFile);
-
-//    level.obstacles[0] = (Rectangle){0, 0, 1920, 64};
-//    level.obstacles[1] = (Rectangle){0, 0, 64, 1080};
-//    level.obstacles[2] = (Rectangle){256, 256, 960, 64};
-//    level.obstacles[3] = (Rectangle){256, 256, 64, 540};
-//    level.finish = (Rectangle){64, 64, 64, 64};
-//    level.gravitonStart = (Vector2){960 + 256, 540 + 256};
-//    level.atomStart = (Vector2){860, 440};
 
     gravitonPosition = level.gravitonStart;
     atomPosition = level.atomStart;
