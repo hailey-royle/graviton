@@ -297,7 +297,7 @@ void DrawUi() {
         }
     } else if (gameState == GAME_LEVELS) {
         if (Button((Rectangle){WINDOW_WIDTH - 112, 16, 96, 48}, "Exit")) {
-            quitGame = true;
+            gameState = GAME_START;
         }
         DrawText("Filters", 72, 72, 48, GRAV_WHITE);
         ToggleButton((Rectangle){64, 128, 256, 48}, &levelSelection.easy, "Easy");
