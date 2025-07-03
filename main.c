@@ -79,6 +79,18 @@ void InitGame() {
     SetTargetFPS(FPS);
 }
 
+void CleanLevel() {
+    gravitonPosition = level.gravitonStart;
+    atomPosition = level.atomStart;
+    atomSpeed = (Vector2){0, 0};
+    atomForce = (Vector2){0, 0};
+    timer = 0.0;
+    gravitonMoves = 0;
+    for (int i = 0; i < FPS; i++) {
+         atomTrace[i].active = false;
+    }
+}
+
 void InitLevel() {
     char levelData[256];
     char *levelDataPointer = levelData;
@@ -176,16 +188,6 @@ void InitLevel() {
             level.obstacles[lineNumber - 7].height = TextToFloat(w);
             i += 16;
         }
-    }
-
-    gravitonPosition = level.gravitonStart;
-    atomPosition = level.atomStart;
-    atomSpeed = (Vector2){0, 0};
-    atomForce = (Vector2){0, 0};
-    timer = 0.0;
-    gravitonMoves = 0;
-    for (int i = 0; i < FPS; i++) {
-         atomTrace[i].active = false;
     }
 }
 
@@ -292,15 +294,7 @@ void DrawUi() {
             quitGame = true;
         }
         if (Button((Rectangle){(WINDOW_WIDTH / 2) - 192, (WINDOW_HIGHT / 2) - 64, 384, 128}, "Start")) {
-            gravitonPosition = level.gravitonStart;
-            atomPosition = level.atomStart;
-            atomSpeed = (Vector2){0, 0};
-            atomForce = (Vector2){0, 0};
-            timer = 0.0;
-            gravitonMoves = 0;
-            for (int i = 0; i < FPS; i++) {
-                 atomTrace[i].active = false;
-            }
+            CleanLevel();
 
             gameState = GAME_PLAY;
         }
@@ -355,8 +349,8 @@ void Draw() {
 int main(void) {
 
     InitGame();
-
     InitLevel();
+    CleanLevel();
 
     while (!WindowShouldClose() && (quitGame == false)) {
         Update();
