@@ -288,7 +288,7 @@ void DrawMoves() {
 
 void DrawUi() {
     if (gameState == GAME_START) {
-        DrawText(level.name, 64, 64, 128, GRAV_WHITE);
+        DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
 
         if (Button((Rectangle){WINDOW_WIDTH - 112, 16, 96, 48}, "Exit")) {
             quitGame = true;
