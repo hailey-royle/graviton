@@ -1,3 +1,4 @@
+gcc main.c -o main -std=c99 -lraylib
 gcc main.c -std=c99 -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -Wall -Werror -o main
 
 yes, seriously
