@@ -1,8 +1,5 @@
 #include <raylib.h>
 #include <raymath.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <dirent.h>
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HIGHT 1080
@@ -26,8 +23,6 @@ int currentAtomTraceSection = 0;
 int gravitonMoves = 0;
 
 float timer = 0.0;
-char charTimer[16];
-char charGravitonMoves[16];
 
 bool gameWon = false;
 bool quitGame = false;
@@ -117,68 +112,68 @@ void InitLevel() {
             w[1] = levelDataPointer[i+1];
             w[2] = levelDataPointer[i+2];
             w[3] = levelDataPointer[i+3];
-            level.gravitonStart.x = strtof(w, NULL);
+            level.gravitonStart.x = TextToFloat(w);
             w[0] = levelDataPointer[i+4];
             w[1] = levelDataPointer[i+5];
             w[2] = levelDataPointer[i+6];
             w[3] = levelDataPointer[i+7];
-            level.gravitonStart.y = strtof(w, NULL);
+            level.gravitonStart.y = TextToFloat(w);
             i += 8;
         } else if (lineNumber == 5) {
             w[0] = levelDataPointer[i];
             w[1] = levelDataPointer[i+1];
             w[2] = levelDataPointer[i+2];
             w[3] = levelDataPointer[i+3];
-            level.atomStart.x = strtof(w, NULL);
+            level.atomStart.x = TextToFloat(w);
             w[0] = levelDataPointer[i+4];
             w[1] = levelDataPointer[i+5];
             w[2] = levelDataPointer[i+6];
             w[3] = levelDataPointer[i+7];
-            level.atomStart.y = strtof(w, NULL);
+            level.atomStart.y = TextToFloat(w);
             i += 8;
         } else if (lineNumber == 6) {
             w[0] = levelDataPointer[i];
             w[1] = levelDataPointer[i+1];
             w[2] = levelDataPointer[i+2];
             w[3] = levelDataPointer[i+3];
-            level.finish.x = strtof(w, NULL);
+            level.finish.x = TextToFloat(w);
             w[0] = levelDataPointer[i+4];
             w[1] = levelDataPointer[i+5];
             w[2] = levelDataPointer[i+6];
             w[3] = levelDataPointer[i+7];
-            level.finish.y = strtof(w, NULL);
+            level.finish.y = TextToFloat(w);
             w[0] = levelDataPointer[i+8];
             w[1] = levelDataPointer[i+9];
             w[2] = levelDataPointer[i+10];
             w[3] = levelDataPointer[i+11];
-            level.finish.width = strtof(w, NULL);
+            level.finish.width = TextToFloat(w);
             w[0] = levelDataPointer[i+12];
             w[1] = levelDataPointer[i+13];
             w[2] = levelDataPointer[i+14];
             w[3] = levelDataPointer[i+15];
-            level.finish.height = strtof(w, NULL);
+            level.finish.height = TextToFloat(w);
             i += 16;
         } else if (lineNumber > 6) {
             w[0] = levelDataPointer[i];
             w[1] = levelDataPointer[i+1];
             w[2] = levelDataPointer[i+2];
             w[3] = levelDataPointer[i+3];
-            level.obstacles[lineNumber - 7].x = strtof(w, NULL);
+            level.obstacles[lineNumber - 7].x = TextToFloat(w);
             w[0] = levelDataPointer[i+4];
             w[1] = levelDataPointer[i+5];
             w[2] = levelDataPointer[i+6];
             w[3] = levelDataPointer[i+7];
-            level.obstacles[lineNumber - 7].y = strtof(w, NULL);
+            level.obstacles[lineNumber - 7].y = TextToFloat(w);
             w[0] = levelDataPointer[i+8];
             w[1] = levelDataPointer[i+9];
             w[2] = levelDataPointer[i+10];
             w[3] = levelDataPointer[i+11];
-            level.obstacles[lineNumber - 7].width = strtof(w, NULL);
+            level.obstacles[lineNumber - 7].width = TextToFloat(w);
             w[0] = levelDataPointer[i+12];
             w[1] = levelDataPointer[i+13];
             w[2] = levelDataPointer[i+14];
             w[3] = levelDataPointer[i+15];
-            level.obstacles[lineNumber - 7].height = strtof(w, NULL);
+            level.obstacles[lineNumber - 7].height = TextToFloat(w);
             i += 16;
         }
     }
@@ -282,13 +277,11 @@ void DrawLevel() {
 }
 
 void DrawTimer() {
-    sprintf(charTimer, "%.2f", timer);
-    DrawText(charTimer, WINDOW_WIDTH - 128, 32, 32, GRAV_WHITE);
+    DrawText(TextFormat("%.2f", timer), WINDOW_WIDTH - 128, 32, 32, GRAV_WHITE);
 }
 
 void DrawMoves() {
-    sprintf(charGravitonMoves, "%d", gravitonMoves);
-    DrawText(charGravitonMoves, WINDOW_WIDTH - 128, 96, 32, GRAV_WHITE);
+    DrawText(TextFormat("%d", gravitonMoves), WINDOW_WIDTH - 128, 96, 32, GRAV_WHITE);
 }
 
 void DrawUi() {
