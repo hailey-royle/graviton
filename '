@@ -92,6 +92,7 @@ void InitLevel() {
     levelDataPointer = LoadFileText("levels/a");
     int i = 0;
     int lineNumber = 1;
+    char w[5] = "0000\0";
     while (levelDataPointer[i] != '\0') {
         if (levelDataPointer[i] == '\n') {
             lineNumber++;
