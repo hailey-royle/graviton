@@ -5,11 +5,9 @@
 //game data
 //----------------------------------------------------------------
 
-#define WINDOW_WIDTH 1920
-#define WINDOW_HIGHT 1080
 #define FPS 60
-#define HALF_SPRITE_WH 32
-#define GRAVITY 0.4
+#define SPRITE_SIZE 64
+#define GRAVITY 0.6
 #define ATOM_TRACE_THICK 4
 #define BUTTONS_NUMBER 16
 
@@ -78,7 +76,7 @@ struct Level level;
 //----------------------------------------------------------------
 
 void InitGame() {
-    InitWindow(WINDOW_WIDTH, WINDOW_HIGHT, "graviton");
+    InitWindow(0, 0, "graviton");
 
     testingGraviton = LoadTexture("assets/TestingGraviton.png");
     testingAtom = LoadTexture("assets/TestingAtom.png");
@@ -215,8 +213,8 @@ void DrawLevel() {
             DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
          }
     }
-    DrawTextureV(testingAtom, Vector2SubtractValue(atomPosition, HALF_SPRITE_WH), GRAV_WHITE);
-    DrawTextureV(testingGraviton, Vector2SubtractValue(gravitonPosition, HALF_SPRITE_WH), GRAV_WHITE);
+    DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63}, (Rectangle){atomPosition.x - 32, atomPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
+    DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63}, (Rectangle){gravitonPosition.x - 32, gravitonPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
 }
 
 bool Button(const Rectangle rect, const char *text) {
@@ -230,6 +228,11 @@ bool Button(const Rectangle rect, const char *text) {
 }
 
 void ToggleButton(const Rectangle rect, bool *toggle, const char *text) {
+    if (*toggle == true) {
+        text = TextFormat("[X] %s", text);
+    } else if (*toggle == false) {
+        text = TextFormat("[ ] %s", text);
+    }
     if (Button(rect, text)) {
         if (*toggle == true) {
             *toggle = false;
@@ -237,34 +240,35 @@ void ToggleButton(const Rectangle rect, bool *toggle, const char *text) {
             *toggle = true;
         }
     }
-    if (*toggle == true) {
-        DrawText("[X]", rect.x + (rect.width - 48), rect.y + 8, (rect.height * 2) / 3, GRAV_WHITE);
-    } else {
-        DrawText("[ ]", rect.x + (rect.width - 48), rect.y + 8, (rect.height * 2) / 3, GRAV_WHITE);
-    }
 }
 
 void DrawUi() {
     if (gameState == GAME_START) {
         DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
-        if (Button((Rectangle){WINDOW_WIDTH - 112, 16, 96, 48}, "Exit")) {
+        if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
             quitGame = true;
         }
-        if (Button((Rectangle){(WINDOW_WIDTH / 2) - 192, (WINDOW_HIGHT / 2) - 64, 384, 128}, "Start")) {
+        if (Button((Rectangle){768, 476, 384, 128}, "Start")) {
             gameState = GAME_PLAY;
         }
-        if (Button((Rectangle){64, WINDOW_HIGHT / 2, 256, 64}, "Levels")) {
+        if (Button((Rectangle){64, 540, 256, 64}, "Levels")) {
             gameState = GAME_LEVELS;
         }
-        if (Button((Rectangle){64, (WINDOW_HIGHT / 2) + 128, 256, 64}, "Cosmetics")) {
+        if (Button((Rectangle){64, 668, 256, 64}, "Cosmetics")) {
             gameState = GAME_COSMETICS;
         }
-        if (Button((Rectangle){64, (WINDOW_HIGHT / 2) + 256, 256, 64}, "Settings")) {
+        if (Button((Rectangle){64, 796, 256, 64}, "Settings")) {
             gameState = GAME_SETTINGS;
         }
     } else if (gameState == GAME_LEVELS) {
-        if (Button((Rectangle){WINDOW_WIDTH - 112, 16, 96, 48}, "Exit")) {
+        if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
             gameState = GAME_START;
+        }
+        if (Button((Rectangle){384, 508, 64, 64}, "<-")) {
+            //left
+        }
+        if (Button((Rectangle){1536, 508, 64, 64}, "->")) {
+            //right
         }
         DrawText("Filters", 72, 72, 48, GRAV_WHITE);
         ToggleButton((Rectangle){64, 128, 256, 48}, &levelSelection.easy, "Easy");
@@ -274,26 +278,26 @@ void DrawUi() {
         ToggleButton((Rectangle){64, 384, 256, 48}, &levelSelection.atempted, "Atempted");
         ToggleButton((Rectangle){64, 448, 256, 48}, &levelSelection.finished, "Finished");
     } else if (gameState == GAME_COSMETICS) {
-        if (Button((Rectangle){WINDOW_WIDTH - 112, 16, 96, 48}, "Exit")) {
+        if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_SETTINGS) {
-        if (Button((Rectangle){WINDOW_WIDTH - 112, 16, 96, 48}, "Exit")) {
+        if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_PLAY) {
-        DrawText(TextFormat("%.2f", timer), WINDOW_WIDTH - 128, 32, 32, GRAV_WHITE);
-        DrawText(TextFormat("%d", gravitonMoves), WINDOW_WIDTH - 128, 96, 32, GRAV_WHITE);
+        DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
+        DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
     } else if (gameState == GAME_END) {
-        DrawText(TextFormat("%.2f", timer), WINDOW_WIDTH - 128, 32, 32, GRAV_WHITE);
-        DrawText(TextFormat("%d", gravitonMoves), WINDOW_WIDTH - 128, 96, 32, GRAV_WHITE);
+        DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
+        DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
         if (gameWon == true) {
             DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
         }
         if (gameWon == false) {
             DrawText("You Lost!", 64, 64, 128, GRAV_WHITE);
         }
-        if (Button((Rectangle){(WINDOW_WIDTH / 2) - 192, (WINDOW_HIGHT / 2) - 64, 384, 128}, "Home")) {
+        if (Button((Rectangle){768, 476, 384, 128}, "Home")) {
             gameState = GAME_START;
             ResetLevel();
         }
