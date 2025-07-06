@@ -203,18 +203,29 @@ void Update() {
 //updating the screen functions
 //----------------------------------------------------------------
 
-void DrawLevel() {
-    DrawRectangleLinesEx(level.finish, 4.0, GRAV_BLUE);
-    for (int i = 0; i < 16; i++) {
-        DrawRectangleLinesEx(level.obstacles[i], 4, GRAV_RED);
+void DrawLevel(bool fullscreen) {
+    if (fullscreen == true) { 
+        DrawRectangleLinesEx(level.finish, 4.0, GRAV_BLUE);
+        for (int i = 0; i < 16; i++) {
+            DrawRectangleLinesEx(level.obstacles[i], 4.0, GRAV_RED);
+        }
+        for (int i = 0; i <= FPS; i++) {
+            if (atomTrace[i].active == true) {
+                DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
+            }
+        }
+        DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63}, (Rectangle){atomPosition.x - 32, atomPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
+        DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63}, (Rectangle){gravitonPosition.x - 32, gravitonPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
+    } else {
+        DrawRectangle(360, 202, 1200, 676, GRAV_BLACK);
+        DrawRectangleLinesEx((Rectangle){356, 198, 1204, 680}, 4.0, GRAV_DGRAY);
+        DrawRectangleLinesEx((Rectangle){((level.finish.x * 10) / 16) + 360, ((level.finish.y * 10) / 16) + 202, ((level.finish.width * 10) / 16), ((level.finish.height * 10) / 16)}, 2.0, GRAV_BLUE);
+        for (int i = 0; i < 16; i++) {
+            DrawRectangleLinesEx((Rectangle){((level.obstacles[i].x * 10) / 16) + 360, ((level.obstacles[i].y * 10) / 16) + 202, ((level.obstacles[i].width * 10) / 16), ((level.obstacles[i].height * 10) / 16)}, 2.0, GRAV_RED);
+        }
+        DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63}, (Rectangle){(((atomPosition.x - 16) * 10) / 16) + 360, (((atomPosition.y - 16) * 10) / 16) + 202, 32, 32}, (Vector2){0, 0}, 0.0, WHITE);
+        DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63}, (Rectangle){(((gravitonPosition.x - 16) * 10) / 16) + 360, (((gravitonPosition.y - 16) * 10) / 16) + 202, 32, 32}, (Vector2){0, 0}, 0.0, WHITE);
     }
-    for (int i = 0; i <= FPS; i++) {
-         if (atomTrace[i].active == true) {
-            DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
-         }
-    }
-    DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63}, (Rectangle){atomPosition.x - 32, atomPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
-    DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63}, (Rectangle){gravitonPosition.x - 32, gravitonPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
 }
 
 bool Button(const Rectangle rect, const char *text) {
@@ -261,10 +272,11 @@ void DrawUi() {
             gameState = GAME_SETTINGS;
         }
     } else if (gameState == GAME_LEVELS) {
+        DrawLevel(false);
         if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
             gameState = GAME_START;
         }
-        if (Button((Rectangle){384, 508, 64, 64}, "<-")) {
+        if (Button((Rectangle){320, 508, 64, 64}, "<-")) {
             //left
         }
         if (Button((Rectangle){1536, 508, 64, 64}, "->")) {
@@ -307,7 +319,7 @@ void DrawUi() {
 void Draw() {
     BeginDrawing();
         ClearBackground(GRAV_BLACK);
-        DrawLevel();
+        DrawLevel(true);
         DrawUi();
     EndDrawing();
 }
