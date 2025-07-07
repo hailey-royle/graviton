@@ -7,7 +7,7 @@
 
 #define FPS 60
 #define SPRITE_SIZE 64
-#define GRAVITY 0.6
+#define GRAVITY 0.5
 #define ATOM_TRACE_THICK 4
 #define BUTTONS_NUMBER 16
 
@@ -21,6 +21,9 @@
 Texture2D testingGraviton;
 Texture2D testingAtom;
 
+FilePathList levelFilePathList;
+
+int selectedLevel = 0;
 int currentAtomTraceSection = 0;
 int gravitonMoves = 0;
 float timer = 0.0;
@@ -48,7 +51,7 @@ struct LevelSelection {
     bool medium;
     bool hard;
     bool hell;
-    bool atempted;
+    bool attempted;
     bool finished;
 };
 struct LevelSelection levelSelection;
@@ -69,11 +72,62 @@ struct Level {
     Vector2 atomStart;
     int difficulty;
 };
-struct Level level;
+struct Level level[16];
 
 //----------------------------------------------------------------
 //init functions
 //----------------------------------------------------------------
+
+void InitLevel(char *filePath, int funi) {
+    char levelData[256];
+    char *levelDataPointer = levelData;
+    levelDataPointer = LoadFileText(filePath);
+    int i = 0;
+    int lineNumber = 1;
+    while (levelDataPointer[i] != '\0') {
+        if (levelDataPointer[i] == '\n') {
+            lineNumber++;
+            i++;
+        } else if (lineNumber == 1) {
+            level[funi].name[i] = levelDataPointer[i];
+            i++;
+        } else if (lineNumber == 2) {
+            level[funi].designer[i] = levelDataPointer[i];
+            i++;
+        } else if (lineNumber == 3) {
+            if (levelDataPointer[i] == '1') {
+                level[funi].difficulty = 1;
+            } else if (levelDataPointer[i] == '2') {
+                level[funi].difficulty = 2;
+            } else if (levelDataPointer[i] == '3') {
+                level[funi].difficulty = 3;
+            } else if (levelDataPointer[i] == '4') {
+                level[funi].difficulty = 4;
+            }
+            i++;
+        } else if (lineNumber == 4) {
+            level[funi].gravitonStart.x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
+            level[funi].gravitonStart.y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
+            i += 8;
+        } else if (lineNumber == 5) {
+            level[funi].atomStart.x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
+            level[funi].atomStart.y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
+            i += 8;
+        } else if (lineNumber == 6) {
+            level[funi].finish.x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
+            level[funi].finish.y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
+            level[funi].finish.width = TextToFloat(TextSubtext(levelDataPointer, i + 8, 4));
+            level[funi].finish.height = TextToFloat(TextSubtext(levelDataPointer, i + 12, 4));
+            i += 16;
+        } else if (lineNumber > 6) {
+            level[funi].obstacles[lineNumber - 7].x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
+            level[funi].obstacles[lineNumber - 7].y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
+            level[funi].obstacles[lineNumber - 7].width = TextToFloat(TextSubtext(levelDataPointer, i + 8, 4));
+            level[funi].obstacles[lineNumber - 7].height = TextToFloat(TextSubtext(levelDataPointer, i + 12, 4));
+            i += 16;
+        }
+    }
+}
 
 void InitGame() {
     InitWindow(0, 0, "graviton");
@@ -82,56 +136,10 @@ void InitGame() {
     testingAtom = LoadTexture("assets/TestingAtom.png");
 
     SetTargetFPS(FPS);
-}
 
-void InitLevel() {
-    char levelData[256];
-    char *levelDataPointer = levelData;
-    levelDataPointer = LoadFileText("levels/a");
-    int i = 0;
-    int lineNumber = 1;
-    while (levelDataPointer[i] != '\0') {
-        if (levelDataPointer[i] == '\n') {
-            lineNumber++;
-            i++;
-        } else if (lineNumber == 1) {
-            level.name[i] = levelDataPointer[i];
-            i++;
-        } else if (lineNumber == 2) {
-            level.designer[i] = levelDataPointer[i];
-            i++;
-        } else if (lineNumber == 3) {
-            if (levelDataPointer[i] == '1') {
-                level.difficulty = 1;
-            } else if (levelDataPointer[i] == '2') {
-                level.difficulty = 2;
-            } else if (levelDataPointer[i] == '3') {
-                level.difficulty = 3;
-            } else if (levelDataPointer[i] == '4') {
-                level.difficulty = 4;
-            }
-            i++;
-        } else if (lineNumber == 4) {
-            level.gravitonStart.x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
-            level.gravitonStart.y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
-            i += 8;
-        } else if (lineNumber == 5) {
-            level.atomStart.x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
-            level.atomStart.y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
-            i += 8;
-        } else if (lineNumber == 6) {
-            level.finish.x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
-            level.finish.y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
-            level.finish.width = TextToFloat(TextSubtext(levelDataPointer, i + 8, 4));
-            level.finish.height = TextToFloat(TextSubtext(levelDataPointer, i + 12, 4));
-            i += 16;
-        } else if (lineNumber > 6) {
-            level.obstacles[lineNumber - 7].x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
-            level.obstacles[lineNumber - 7].y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
-            level.obstacles[lineNumber - 7].width = TextToFloat(TextSubtext(levelDataPointer, i + 8, 4));
-            level.obstacles[lineNumber - 7].height = TextToFloat(TextSubtext(levelDataPointer, i + 12, 4));
-            i += 16;
-        }
+    levelFilePathList = LoadDirectoryFiles("levels");
+    for (int i = 0; i < levelFilePathList.count; i++) {
+        InitLevel(levelFilePathList.paths[i], i);
     }
 }
 
@@ -140,8 +148,8 @@ void InitLevel() {
 //----------------------------------------------------------------
 
 void ResetLevel() {
-    gravitonPosition = level.gravitonStart;
-    atomPosition = level.atomStart;
+    gravitonPosition = level[selectedLevel].gravitonStart;
+    atomPosition = level[selectedLevel].atomStart;
     atomSpeed = (Vector2){0, 0};
     atomForce = (Vector2){0, 0};
     timer = 0.0;
@@ -167,12 +175,12 @@ void UpdateAtomTrace() {
 }
 
 void AtomCollision() {
-    if (CheckCollisionPointRec(atomPosition, level.finish)) {
+    if (CheckCollisionPointRec(atomPosition, level[selectedLevel].finish)) {
         gameState = GAME_END;
         gameWon = true;
     }
     for (int i = 0; i < 16; i++) {
-        if (CheckCollisionPointRec(atomPosition, level.obstacles[i])) {
+        if (CheckCollisionPointRec(atomPosition, level[selectedLevel].obstacles[i])) {
             gameState = GAME_END;
             gameWon = false;
         }
@@ -205,9 +213,9 @@ void Update() {
 
 void DrawLevel(bool fullscreen) {
     if (fullscreen == true) { 
-        DrawRectangleLinesEx(level.finish, 4.0, GRAV_BLUE);
+        DrawRectangleLinesEx(level[selectedLevel].finish, 4.0, GRAV_BLUE);
         for (int i = 0; i < 16; i++) {
-            DrawRectangleLinesEx(level.obstacles[i], 4.0, GRAV_RED);
+            DrawRectangleLinesEx(level[selectedLevel].obstacles[i], 4.0, GRAV_RED);
         }
         for (int i = 0; i <= FPS; i++) {
             if (atomTrace[i].active == true) {
@@ -219,12 +227,26 @@ void DrawLevel(bool fullscreen) {
     } else {
         DrawRectangle(360, 202, 1200, 676, GRAV_BLACK);
         DrawRectangleLinesEx((Rectangle){356, 198, 1204, 680}, 4.0, GRAV_DGRAY);
-        DrawRectangleLinesEx((Rectangle){((level.finish.x * 10) / 16) + 360, ((level.finish.y * 10) / 16) + 202, ((level.finish.width * 10) / 16), ((level.finish.height * 10) / 16)}, 2.0, GRAV_BLUE);
+        DrawRectangleLinesEx((Rectangle){
+                ((level[selectedLevel].finish.x * 10) / 16) + 360, 
+                ((level[selectedLevel].finish.y * 10) / 16) + 202, 
+                ((level[selectedLevel].finish.width * 10) / 16), 
+                ((level[selectedLevel].finish.height * 10) / 16)
+                }, 2.0, GRAV_BLUE);
         for (int i = 0; i < 16; i++) {
-            DrawRectangleLinesEx((Rectangle){((level.obstacles[i].x * 10) / 16) + 360, ((level.obstacles[i].y * 10) / 16) + 202, ((level.obstacles[i].width * 10) / 16), ((level.obstacles[i].height * 10) / 16)}, 2.0, GRAV_RED);
+            DrawRectangleLinesEx((Rectangle){
+                ((level[selectedLevel].obstacles[i].x * 10) / 16) + 360,
+                ((level[selectedLevel].obstacles[i].y * 10) / 16) + 202,
+                ((level[selectedLevel].obstacles[i].width * 10) / 16),
+                ((level[selectedLevel].obstacles[i].height * 10) / 16)
+                }, 2.0, GRAV_RED);
         }
-        DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63}, (Rectangle){(((atomPosition.x - 16) * 10) / 16) + 360, (((atomPosition.y - 16) * 10) / 16) + 202, 32, 32}, (Vector2){0, 0}, 0.0, WHITE);
-        DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63}, (Rectangle){(((gravitonPosition.x - 16) * 10) / 16) + 360, (((gravitonPosition.y - 16) * 10) / 16) + 202, 32, 32}, (Vector2){0, 0}, 0.0, WHITE);
+        DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63},
+            (Rectangle){(((atomPosition.x - 16) * 10) / 16) + 360, (((atomPosition.y - 16) * 10) / 16) + 202, 32, 32},
+            (Vector2){0, 0}, 0.0, WHITE);
+        DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63},
+            (Rectangle){(((gravitonPosition.x - 16) * 10) / 16) + 360, (((gravitonPosition.y - 16) * 10) / 16) + 202, 32, 32},
+            (Vector2){0, 0}, 0.0, WHITE);
     }
 }
 
@@ -277,17 +299,23 @@ void DrawUi() {
             gameState = GAME_START;
         }
         if (Button((Rectangle){320, 508, 64, 64}, "<-")) {
-            //left
+            if (selectedLevel > 0) {
+                selectedLevel--;
+                ResetLevel();
+            }
         }
         if (Button((Rectangle){1536, 508, 64, 64}, "->")) {
-            //right
+            if (selectedLevel < levelFilePathList.count - 1) {
+                selectedLevel++;
+                ResetLevel();
+            }
         }
         DrawText("Filters", 72, 72, 48, GRAV_WHITE);
         ToggleButton((Rectangle){64, 128, 256, 48}, &levelSelection.easy, "Easy");
         ToggleButton((Rectangle){64, 192, 256, 48}, &levelSelection.medium, "Medium");
         ToggleButton((Rectangle){64, 256, 256, 48}, &levelSelection.hard, "Hard");
         ToggleButton((Rectangle){64, 320, 256, 48}, &levelSelection.hell, "Hell");
-        ToggleButton((Rectangle){64, 384, 256, 48}, &levelSelection.atempted, "Atempted");
+        ToggleButton((Rectangle){64, 384, 256, 48}, &levelSelection.attempted, "Attempted");
         ToggleButton((Rectangle){64, 448, 256, 48}, &levelSelection.finished, "Finished");
     } else if (gameState == GAME_COSMETICS) {
         if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
@@ -331,7 +359,6 @@ void Draw() {
 int main(void) {
 
     InitGame();
-    InitLevel();
     ResetLevel();
 
     while (!WindowShouldClose() && (quitGame == false)) {
@@ -341,6 +368,7 @@ int main(void) {
 
     UnloadTexture(testingGraviton);
     UnloadTexture(testingAtom);
+    UnloadDirectoryFiles(levelFilePathList);
 
     CloseWindow();
 
