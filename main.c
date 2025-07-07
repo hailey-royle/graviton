@@ -14,7 +14,6 @@
 #define GRAV_BLACK (Color){15, 15, 15, 255}
 #define GRAV_WHITE (Color){239, 239, 239, 255}
 #define GRAV_DGRAY (Color){63, 63, 63, 255}
-#define GRAV_LGRAY (Color){191, 191, 191, 255}
 #define GRAV_RED (Color){127, 15, 15, 255}
 #define GRAV_BLUE (Color){15, 15, 127, 255}
 
@@ -66,10 +65,9 @@ struct AtomTraceSection {
 struct AtomTraceSection atomTrace[FPS];
 
 struct Level {
-    Rectangle obstacles[16];
+    int map[576];
     char name[64];
     char designer[64];
-    Rectangle finish;
     Vector2 gravitonStart;
     Vector2 atomStart;
     int difficulty;
@@ -81,10 +79,11 @@ struct Level level[16];
 //----------------------------------------------------------------
 
 void InitLevel(char *filePath, int funi) {
-    char levelData[256];
+    char levelData[1024];
     char *levelDataPointer = levelData;
     levelDataPointer = LoadFileText(filePath);
     int i = 0;
+    int j = 0;
     int lineNumber = 1;
     while (levelDataPointer[i] != '\0') {
         if (levelDataPointer[i] == '\n') {
@@ -115,18 +114,10 @@ void InitLevel(char *filePath, int funi) {
             level[funi].atomStart.x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
             level[funi].atomStart.y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
             i += 8;
-        } else if (lineNumber == 6) {
-            level[funi].finish.x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
-            level[funi].finish.y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
-            level[funi].finish.width = TextToFloat(TextSubtext(levelDataPointer, i + 8, 4));
-            level[funi].finish.height = TextToFloat(TextSubtext(levelDataPointer, i + 12, 4));
-            i += 16;
-        } else if (lineNumber > 6) {
-            level[funi].obstacles[lineNumber - 7].x = TextToFloat(TextSubtext(levelDataPointer, i, 4));
-            level[funi].obstacles[lineNumber - 7].y = TextToFloat(TextSubtext(levelDataPointer, i + 4, 4));
-            level[funi].obstacles[lineNumber - 7].width = TextToFloat(TextSubtext(levelDataPointer, i + 8, 4));
-            level[funi].obstacles[lineNumber - 7].height = TextToFloat(TextSubtext(levelDataPointer, i + 12, 4));
-            i += 16;
+        } else if (lineNumber >= 6) {
+            level[funi].map[j] = levelDataPointer[i];
+            i++;
+            j++;
         }
     }
 }
@@ -177,14 +168,17 @@ void UpdateAtomTrace() {
 }
 
 void AtomCollision() {
-    if (CheckCollisionPointRec(atomPosition, level[selectedLevel].finish)) {
-        gameState = GAME_END;
-        gameWon = true;
-    }
-    for (int i = 0; i < 16; i++) {
-        if (CheckCollisionPointRec(atomPosition, level[selectedLevel].obstacles[i])) {
-            gameState = GAME_END;
-            gameWon = false;
+    for (int i = 0; i <= 576; i++) {
+        if (level[selectedLevel].map[i] == 49) {
+            if (CheckCollisionPointRec(atomPosition, (Rectangle){(i % 32) * 60, (i / 32) * 60, 60, 60})) {
+                gameState = GAME_END;
+                gameWon = false;
+            }
+        } else if (level[selectedLevel].map[i] == 50) {
+            if (CheckCollisionPointRec(atomPosition, (Rectangle){(i % 32) * 60, (i / 32) * 60, 60, 60})) {
+                gameState = GAME_END;
+                gameWon = true;
+            }
         }
     }
 }
@@ -215,9 +209,12 @@ void Update() {
 
 void DrawLevel(bool fullscreen) {
     if (fullscreen == true) { 
-        DrawRectangleLinesEx(level[selectedLevel].finish, 4.0, GRAV_BLUE);
-        for (int i = 0; i < 16; i++) {
-            DrawRectangleLinesEx(level[selectedLevel].obstacles[i], 4.0, GRAV_RED);
+        for (int i = 0; i <= 576; i++) {
+            if (level[selectedLevel].map[i] == 49) {
+                DrawRectangleLinesEx((Rectangle){(i % 32) * 60, (i / 32) * 60, 60, 60}, 4.0, GRAV_RED);
+            } else if (level[selectedLevel].map[i] == 50) {
+                DrawRectangleLinesEx((Rectangle){(i % 32) * 60, (i / 32) * 60, 60, 60}, 4.0, GRAV_BLUE);
+            }
         }
         for (int i = 0; i <= FPS; i++) {
             if (atomTrace[i].active == true) {
@@ -229,7 +226,14 @@ void DrawLevel(bool fullscreen) {
     } else {
         DrawRectangle(320, 180, 1280, 720, GRAV_BLACK);
         DrawRectangleLinesEx((Rectangle){316, 176, 1288, 728}, 4.0, GRAV_DGRAY);
-        DrawRectangleLinesEx((Rectangle){
+        for (int i = 0; i <= 576; i++) {
+            if (level[selectedLevel].map[i] == 49) {
+                DrawRectangleLinesEx((Rectangle){((i % 32) * 40) + 320, ((i / 32) * 40) + 180, 40, 40}, 4.0, GRAV_RED);
+            } else if (level[selectedLevel].map[i] == 50) {
+                DrawRectangleLinesEx((Rectangle){((i % 32) * 40) + 320, ((i / 32) * 40) + 180, 40, 40}, 4.0, GRAV_BLUE);
+            }
+        }
+        /*DrawRectangleLinesEx((Rectangle){
                 ((level[selectedLevel].finish.x * 2) / 3) + 320, 
                 ((level[selectedLevel].finish.y * 2) / 3) + 180, 
                 ((level[selectedLevel].finish.width * 2) / 3), 
@@ -242,7 +246,7 @@ void DrawLevel(bool fullscreen) {
                 ((level[selectedLevel].obstacles[i].width * 2) / 3),
                 ((level[selectedLevel].obstacles[i].height * 2) / 3)
                 }, 2.0, GRAV_RED);
-        }
+        }*/
         DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63},
             (Rectangle){(((atomPosition.x - 16) * 2) / 3) + 320, (((atomPosition.y - 16) * 2) / 3) + 180, 32, 32},
             (Vector2){0, 0}, 0.0, WHITE);
