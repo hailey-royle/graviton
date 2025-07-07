@@ -41,6 +41,8 @@ enum GameState {
     GAME_LEVELS,
     GAME_COSMETICS,
     GAME_SETTINGS,
+    GAME_INFORMATION,
+    GAME_TUTORIAL,
     GAME_PLAY,
     GAME_END
 };
@@ -225,27 +227,27 @@ void DrawLevel(bool fullscreen) {
         DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63}, (Rectangle){atomPosition.x - 32, atomPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
         DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63}, (Rectangle){gravitonPosition.x - 32, gravitonPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
     } else {
-        DrawRectangle(360, 202, 1200, 676, GRAV_BLACK);
-        DrawRectangleLinesEx((Rectangle){356, 198, 1204, 680}, 4.0, GRAV_DGRAY);
+        DrawRectangle(320, 180, 1280, 720, GRAV_BLACK);
+        DrawRectangleLinesEx((Rectangle){316, 176, 1288, 728}, 4.0, GRAV_DGRAY);
         DrawRectangleLinesEx((Rectangle){
-                ((level[selectedLevel].finish.x * 10) / 16) + 360, 
-                ((level[selectedLevel].finish.y * 10) / 16) + 202, 
-                ((level[selectedLevel].finish.width * 10) / 16), 
-                ((level[selectedLevel].finish.height * 10) / 16)
+                ((level[selectedLevel].finish.x * 2) / 3) + 320, 
+                ((level[selectedLevel].finish.y * 2) / 3) + 180, 
+                ((level[selectedLevel].finish.width * 2) / 3), 
+                ((level[selectedLevel].finish.height * 2) / 3)
                 }, 2.0, GRAV_BLUE);
         for (int i = 0; i < 16; i++) {
             DrawRectangleLinesEx((Rectangle){
-                ((level[selectedLevel].obstacles[i].x * 10) / 16) + 360,
-                ((level[selectedLevel].obstacles[i].y * 10) / 16) + 202,
-                ((level[selectedLevel].obstacles[i].width * 10) / 16),
-                ((level[selectedLevel].obstacles[i].height * 10) / 16)
+                ((level[selectedLevel].obstacles[i].x * 2) / 3) + 320,
+                ((level[selectedLevel].obstacles[i].y * 2) / 3) + 180,
+                ((level[selectedLevel].obstacles[i].width * 2) / 3),
+                ((level[selectedLevel].obstacles[i].height * 2) / 3)
                 }, 2.0, GRAV_RED);
         }
         DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63},
-            (Rectangle){(((atomPosition.x - 16) * 10) / 16) + 360, (((atomPosition.y - 16) * 10) / 16) + 202, 32, 32},
+            (Rectangle){(((atomPosition.x - 16) * 2) / 3) + 320, (((atomPosition.y - 16) * 2) / 3) + 180, 32, 32},
             (Vector2){0, 0}, 0.0, WHITE);
         DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63},
-            (Rectangle){(((gravitonPosition.x - 16) * 10) / 16) + 360, (((gravitonPosition.y - 16) * 10) / 16) + 202, 32, 32},
+            (Rectangle){(((gravitonPosition.x - 16) * 2) / 3) + 320, (((gravitonPosition.y - 16) * 2) / 3) + 180, 32, 32},
             (Vector2){0, 0}, 0.0, WHITE);
     }
 }
@@ -262,9 +264,9 @@ bool Button(const Rectangle rect, const char *text) {
 
 void ToggleButton(const Rectangle rect, bool *toggle, const char *text) {
     if (*toggle == true) {
-        text = TextFormat("[X] %s", text);
+        text = TextFormat("[X]%s", text);
     } else if (*toggle == false) {
-        text = TextFormat("[ ] %s", text);
+        text = TextFormat("[ ]%s", text);
     }
     if (Button(rect, text)) {
         if (*toggle == true) {
@@ -277,52 +279,65 @@ void ToggleButton(const Rectangle rect, bool *toggle, const char *text) {
 
 void DrawUi() {
     if (gameState == GAME_START) {
-        DrawText("Graviton", 64, 64, 128, GRAV_WHITE);
-        if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
+        DrawText("Graviton", 60, 60, 120, GRAV_WHITE);
+        if (Button((Rectangle){1800, 12, 108, 48}, "Exit")) {
             quitGame = true;
         }
-        if (Button((Rectangle){768, 476, 384, 128}, "Start")) {
+        if (Button((Rectangle){780, 900, 360, 120}, "Start")) {
             gameState = GAME_PLAY;
         }
-        if (Button((Rectangle){64, 540, 256, 64}, "Levels")) {
+        if (Button((Rectangle){60, 180, 240, 48}, "Levels")) {
             gameState = GAME_LEVELS;
         }
-        if (Button((Rectangle){64, 668, 256, 64}, "Cosmetics")) {
+        if (Button((Rectangle){60, 240, 240, 48}, "Cosmetics")) {
             gameState = GAME_COSMETICS;
         }
-        if (Button((Rectangle){64, 796, 256, 64}, "Settings")) {
+        if (Button((Rectangle){60, 300, 240, 48}, "Settings")) {
             gameState = GAME_SETTINGS;
+        }
+        if (Button((Rectangle){60, 360, 240, 48}, "Information")) {
+            gameState = GAME_INFORMATION;
+        }
+        if (Button((Rectangle){60, 420, 240, 48}, "Tutorial")) {
+            gameState = GAME_TUTORIAL;
         }
     } else if (gameState == GAME_LEVELS) {
         DrawLevel(false);
-        if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
+        if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
         }
-        if (Button((Rectangle){320, 508, 64, 64}, "<-")) {
+        if (Button((Rectangle){660, 900, 60, 60}, "<-")) {
             if (selectedLevel > 0) {
                 selectedLevel--;
                 ResetLevel();
             }
         }
-        if (Button((Rectangle){1536, 508, 64, 64}, "->")) {
+        if (Button((Rectangle){1200, 900, 60, 60}, "->")) {
             if (selectedLevel < levelFilePathList.count - 1) {
                 selectedLevel++;
                 ResetLevel();
             }
         }
-        DrawText("Filters", 72, 72, 48, GRAV_WHITE);
-        ToggleButton((Rectangle){64, 128, 256, 48}, &levelSelection.easy, "Easy");
-        ToggleButton((Rectangle){64, 192, 256, 48}, &levelSelection.medium, "Medium");
-        ToggleButton((Rectangle){64, 256, 256, 48}, &levelSelection.hard, "Hard");
-        ToggleButton((Rectangle){64, 320, 256, 48}, &levelSelection.hell, "Hell");
-        ToggleButton((Rectangle){64, 384, 256, 48}, &levelSelection.attempted, "Attempted");
-        ToggleButton((Rectangle){64, 448, 256, 48}, &levelSelection.finished, "Finished");
+        ToggleButton((Rectangle){60, 180, 240, 48}, &levelSelection.easy, "Easy");
+        ToggleButton((Rectangle){60, 240, 240, 48}, &levelSelection.medium, "Medium");
+        ToggleButton((Rectangle){60, 300, 240, 48}, &levelSelection.hard, "Hard");
+        ToggleButton((Rectangle){60, 360, 240, 48}, &levelSelection.hell, "Hell");
+        ToggleButton((Rectangle){60, 420, 240, 48}, &levelSelection.attempted, "Attempted");
+        ToggleButton((Rectangle){60, 480, 240, 48}, &levelSelection.finished, "Finished");
     } else if (gameState == GAME_COSMETICS) {
-        if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
+        if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_SETTINGS) {
-        if (Button((Rectangle){1808, 16, 96, 48}, "Exit")) {
+        if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
+            gameState = GAME_START;
+        }
+    } else if (gameState == GAME_INFORMATION) {
+        if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
+            gameState = GAME_START;
+        }
+    } else if (gameState == GAME_TUTORIAL) {
+        if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_PLAY) {
@@ -332,12 +347,12 @@ void DrawUi() {
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
         if (gameWon == true) {
-            DrawText("You Won!", 64, 64, 128, GRAV_WHITE);
+            DrawText("You Won!", 60, 60, 120, GRAV_WHITE);
         }
         if (gameWon == false) {
-            DrawText("You Lost!", 64, 64, 128, GRAV_WHITE);
+            DrawText("You Lost!", 60, 60, 120, GRAV_WHITE);
         }
-        if (Button((Rectangle){768, 476, 384, 128}, "Home")) {
+        if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
             ResetLevel();
         }
