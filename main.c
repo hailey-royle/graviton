@@ -152,6 +152,28 @@ void ResetLevel() {
     }
 }
 
+void ToggleBool(bool *toggle) {
+    if (*toggle == true) {
+        *toggle = false;
+    } else {
+        *toggle = true;
+    }
+}
+
+void IncreaseSelectedLevel() {
+    if (selectedLevel > 0) {
+        selectedLevel--;
+        ResetLevel();
+    }
+}
+
+void DecreaseSelectedLevel() {
+    if (selectedLevel < levelFilePathList.count - 1) {
+        selectedLevel++;
+        ResetLevel();
+    }
+}
+
 //----------------------------------------------------------------
 //updating the game functions
 //----------------------------------------------------------------
@@ -192,7 +214,49 @@ void UpdateAtom() {
 }
 
 void Update() {
-    if (gameState == GAME_PLAY) {
+    if (gameState != GAME_PLAY) {
+        if (IsKeyPressed(KEY_H)) {
+            gameState = GAME_START;
+            ResetLevel();
+        } else if (IsKeyPressed(KEY_L)) {
+            gameState = GAME_LEVELS;
+            ResetLevel();
+        } else if (IsKeyPressed(KEY_C)) {
+            gameState = GAME_COSMETICS;
+            ResetLevel();
+        } else if (IsKeyPressed(KEY_S)) {
+            gameState = GAME_SETTINGS;
+            ResetLevel();
+        } else if (IsKeyPressed(KEY_I)) {
+            gameState = GAME_INFORMATION;
+            ResetLevel();
+        } else if (IsKeyPressed(KEY_T)) {
+            gameState = GAME_TUTORIAL;
+            ResetLevel();
+        } else if (IsKeyPressed(KEY_SPACE)) {
+            gameState = GAME_PLAY;
+            ResetLevel();
+        }
+    }
+    if (gameState == GAME_LEVELS) {
+        if (IsKeyPressed(KEY_ONE)) {
+            ToggleBool(&levelSelection.easy);
+        } else if (IsKeyPressed(KEY_TWO)) {
+            ToggleBool(&levelSelection.medium);
+        } else if (IsKeyPressed(KEY_THREE)) {
+            ToggleBool(&levelSelection.hard);
+        } else if (IsKeyPressed(KEY_FOUR)) {
+            ToggleBool(&levelSelection.hell);
+        } else if (IsKeyPressed(KEY_A)) {
+            ToggleBool(&levelSelection.attempted);
+        } else if (IsKeyPressed(KEY_F)) {
+            ToggleBool(&levelSelection.finished);
+        } else if (IsKeyPressed(KEY_J)) {
+            IncreaseSelectedLevel();
+        } else if (IsKeyPressed(KEY_K)) {
+            DecreaseSelectedLevel();
+        }
+    } else if (gameState == GAME_PLAY) {
         UpdateAtom();
         timer += GetFrameTime();
 
@@ -259,11 +323,7 @@ void ToggleButton(const Rectangle rect, bool *toggle, const char *text) {
         text = TextFormat("[ ]%s", text);
     }
     if (Button(rect, text)) {
-        if (*toggle == true) {
-            *toggle = false;
-        } else {
-            *toggle = true;
-        }
+        ToggleBool(toggle);
     }
 }
 
@@ -297,16 +357,10 @@ void DrawUi() {
             gameState = GAME_START;
         }
         if (Button((Rectangle){660, 900, 60, 60}, "<-")) {
-            if (selectedLevel > 0) {
-                selectedLevel--;
-                ResetLevel();
-            }
+            IncreaseSelectedLevel();
         }
         if (Button((Rectangle){1200, 900, 60, 60}, "->")) {
-            if (selectedLevel < levelFilePathList.count - 1) {
-                selectedLevel++;
-                ResetLevel();
-            }
+            DecreaseSelectedLevel();
         }
         ToggleButton((Rectangle){60, 180, 240, 48}, &levelSelection.easy, "Easy");
         ToggleButton((Rectangle){60, 240, 240, 48}, &levelSelection.medium, "Medium");
