@@ -233,20 +233,6 @@ void DrawLevel(bool fullscreen) {
                 DrawRectangleLinesEx((Rectangle){((i % 32) * 40) + 320, ((i / 32) * 40) + 180, 40, 40}, 4.0, GRAV_BLUE);
             }
         }
-        /*DrawRectangleLinesEx((Rectangle){
-                ((level[selectedLevel].finish.x * 2) / 3) + 320, 
-                ((level[selectedLevel].finish.y * 2) / 3) + 180, 
-                ((level[selectedLevel].finish.width * 2) / 3), 
-                ((level[selectedLevel].finish.height * 2) / 3)
-                }, 2.0, GRAV_BLUE);
-        for (int i = 0; i < 16; i++) {
-            DrawRectangleLinesEx((Rectangle){
-                ((level[selectedLevel].obstacles[i].x * 2) / 3) + 320,
-                ((level[selectedLevel].obstacles[i].y * 2) / 3) + 180,
-                ((level[selectedLevel].obstacles[i].width * 2) / 3),
-                ((level[selectedLevel].obstacles[i].height * 2) / 3)
-                }, 2.0, GRAV_RED);
-        }*/
         DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63},
             (Rectangle){(((atomPosition.x - 16) * 2) / 3) + 320, (((atomPosition.y - 16) * 2) / 3) + 180, 32, 32},
             (Vector2){0, 0}, 0.0, WHITE);
