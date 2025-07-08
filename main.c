@@ -329,6 +329,7 @@ void ToggleButton(const Rectangle rect, bool *toggle, const char *text) {
 
 void DrawUi() {
     if (gameState == GAME_START) {
+        DrawLevel(true);
         DrawText("Graviton", 60, 60, 120, GRAV_WHITE);
         if (Button((Rectangle){1800, 12, 108, 48}, "Exit")) {
             quitGame = true;
@@ -373,6 +374,21 @@ void DrawUi() {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_SETTINGS) {
+        DrawText("hotkeys", 60, 120, 48, GRAV_WHITE);
+        DrawText("space = start level", 66, 192, 36, GRAV_WHITE);
+        DrawText("h = home", 66, 252, 36, GRAV_WHITE);
+        DrawText("l = levels", 66, 312, 36, GRAV_WHITE);
+        DrawText("c = cosmetics", 66, 372, 36, GRAV_WHITE);
+        DrawText("s = settings", 66, 432, 36, GRAV_WHITE);
+        DrawText("i = information", 66, 492, 36, GRAV_WHITE);
+        DrawText("t = tutorial", 66, 552, 36, GRAV_WHITE);
+        DrawText("level menu hotkeys", 480, 120, 48, GRAV_WHITE);
+        DrawText("1 = filter easy", 492, 192, 36, GRAV_WHITE);
+        DrawText("2 = filter medium", 492, 252, 36, GRAV_WHITE);
+        DrawText("3 = filter hard", 492, 312, 36, GRAV_WHITE);
+        DrawText("4 = filter hell", 492, 372, 36, GRAV_WHITE);
+        DrawText("j = select left", 492, 432, 36, GRAV_WHITE);
+        DrawText("k = select right", 492, 492, 36, GRAV_WHITE);
         if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
         }
@@ -385,9 +401,11 @@ void DrawUi() {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_PLAY) {
+        DrawLevel(true);
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
     } else if (gameState == GAME_END) {
+        DrawLevel(true);
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
         if (gameWon == true) {
@@ -406,7 +424,6 @@ void DrawUi() {
 void Draw() {
     BeginDrawing();
         ClearBackground(GRAV_BLACK);
-        DrawLevel(true);
         DrawUi();
     EndDrawing();
 }
