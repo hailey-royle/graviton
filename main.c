@@ -47,15 +47,11 @@ enum GameState {
 };
 enum GameState gameState = GAME_START;
 
-struct LevelSelection {
-    bool easy;
-    bool medium;
-    bool hard;
-    bool hell;
-    bool attempted;
-    bool finished;
+struct LevelFilters {
+    bool difficulty[4];
+    bool progress[3];
 };
-struct LevelSelection levelSelection;
+struct LevelFilters levelFilters;
 
 struct AtomTraceSection {
     Vector2 start;
@@ -71,6 +67,7 @@ struct Level {
     Vector2 gravitonStart;
     Vector2 atomStart;
     int difficulty;
+    int progress;
 };
 struct Level level[16];
 
@@ -97,13 +94,13 @@ void InitLevel(char *filePath, int funi) {
             i++;
         } else if (lineNumber == 3) {
             if (levelDataPointer[i] == '1') {
-                level[funi].difficulty = 1;
+                level[funi].difficulty = 0;
             } else if (levelDataPointer[i] == '2') {
-                level[funi].difficulty = 2;
+                level[funi].difficulty = 1;
             } else if (levelDataPointer[i] == '3') {
-                level[funi].difficulty = 3;
+                level[funi].difficulty = 2;
             } else if (levelDataPointer[i] == '4') {
-                level[funi].difficulty = 4;
+                level[funi].difficulty = 3;
             }
             i++;
         } else if (lineNumber == 4) {
@@ -134,6 +131,14 @@ void InitGame() {
     for (int i = 0; i < levelFilePathList.count; i++) {
         InitLevel(levelFilePathList.paths[i], i);
     }
+
+    levelFilters.difficulty[0] = true;
+    levelFilters.difficulty[1] = true;
+    levelFilters.difficulty[2] = true;
+    levelFilters.difficulty[3] = true;
+    levelFilters.progress[0] = true;
+    levelFilters.progress[1] = true;
+    levelFilters.progress[2] = true;
 }
 
 //----------------------------------------------------------------
@@ -161,17 +166,19 @@ void ToggleBool(bool *toggle) {
 }
 
 void IncreaseSelectedLevel() {
-    if (selectedLevel > 0) {
-        selectedLevel--;
-        ResetLevel();
-    }
+    do {
+        selectedLevel++;
+        selectedLevel = selectedLevel % levelFilePathList.count;
+    } while (!levelFilters.difficulty[level[selectedLevel].difficulty] || !levelFilters.progress[level[selectedLevel].progress]);
+    ResetLevel();
 }
 
 void DecreaseSelectedLevel() {
-    if (selectedLevel < levelFilePathList.count - 1) {
-        selectedLevel++;
-        ResetLevel();
-    }
+    do {
+        selectedLevel--;
+        selectedLevel = selectedLevel % levelFilePathList.count;
+    } while (!levelFilters.difficulty[level[selectedLevel].difficulty] || !levelFilters.progress[level[selectedLevel].progress]);
+    ResetLevel();
 }
 
 //----------------------------------------------------------------
@@ -240,21 +247,23 @@ void Update() {
     }
     if (gameState == GAME_LEVELS) {
         if (IsKeyPressed(KEY_ONE)) {
-            ToggleBool(&levelSelection.easy);
+            ToggleBool(&levelFilters.difficulty[0]);
         } else if (IsKeyPressed(KEY_TWO)) {
-            ToggleBool(&levelSelection.medium);
+            ToggleBool(&levelFilters.difficulty[1]);
         } else if (IsKeyPressed(KEY_THREE)) {
-            ToggleBool(&levelSelection.hard);
+            ToggleBool(&levelFilters.difficulty[2]);
         } else if (IsKeyPressed(KEY_FOUR)) {
-            ToggleBool(&levelSelection.hell);
-        } else if (IsKeyPressed(KEY_A)) {
-            ToggleBool(&levelSelection.attempted);
-        } else if (IsKeyPressed(KEY_F)) {
-            ToggleBool(&levelSelection.finished);
+            ToggleBool(&levelFilters.difficulty[3]);
+        } else if (IsKeyPressed(KEY_FIVE)) {
+            ToggleBool(&levelFilters.progress[0]);
+        } else if (IsKeyPressed(KEY_SIX)) {
+            ToggleBool(&levelFilters.progress[1]);
+        } else if (IsKeyPressed(KEY_SEVEN)) {
+            ToggleBool(&levelFilters.progress[2]);
         } else if (IsKeyPressed(KEY_J)) {
-            IncreaseSelectedLevel();
-        } else if (IsKeyPressed(KEY_K)) {
             DecreaseSelectedLevel();
+        } else if (IsKeyPressed(KEY_K)) {
+            IncreaseSelectedLevel();
         }
     } else if (gameState == GAME_PLAY) {
         UpdateAtom();
@@ -358,17 +367,18 @@ void DrawUi() {
             gameState = GAME_START;
         }
         if (Button((Rectangle){660, 900, 60, 60}, "<-")) {
-            IncreaseSelectedLevel();
-        }
-        if (Button((Rectangle){1200, 900, 60, 60}, "->")) {
             DecreaseSelectedLevel();
         }
-        ToggleButton((Rectangle){60, 180, 240, 48}, &levelSelection.easy, "Easy");
-        ToggleButton((Rectangle){60, 240, 240, 48}, &levelSelection.medium, "Medium");
-        ToggleButton((Rectangle){60, 300, 240, 48}, &levelSelection.hard, "Hard");
-        ToggleButton((Rectangle){60, 360, 240, 48}, &levelSelection.hell, "Hell");
-        ToggleButton((Rectangle){60, 420, 240, 48}, &levelSelection.attempted, "Attempted");
-        ToggleButton((Rectangle){60, 480, 240, 48}, &levelSelection.finished, "Finished");
+        if (Button((Rectangle){1200, 900, 60, 60}, "->")) {
+            IncreaseSelectedLevel();
+        }
+        ToggleButton((Rectangle){60, 180, 240, 48}, &levelFilters.difficulty[0], "Easy");
+        ToggleButton((Rectangle){60, 240, 240, 48}, &levelFilters.difficulty[1], "Medium");
+        ToggleButton((Rectangle){60, 300, 240, 48}, &levelFilters.difficulty[2], "Hard");
+        ToggleButton((Rectangle){60, 360, 240, 48}, &levelFilters.difficulty[3], "Hell");
+        ToggleButton((Rectangle){60, 420, 240, 48}, &levelFilters.progress[0], "Not Started");
+        ToggleButton((Rectangle){60, 480, 240, 48}, &levelFilters.progress[1], "Started");
+        ToggleButton((Rectangle){60, 540, 240, 48}, &levelFilters.progress[2], "Finished");
     } else if (gameState == GAME_COSMETICS) {
         if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
@@ -387,8 +397,11 @@ void DrawUi() {
         DrawText("2 = filter medium", 492, 252, 36, GRAV_WHITE);
         DrawText("3 = filter hard", 492, 312, 36, GRAV_WHITE);
         DrawText("4 = filter hell", 492, 372, 36, GRAV_WHITE);
-        DrawText("j = select left", 492, 432, 36, GRAV_WHITE);
-        DrawText("k = select right", 492, 492, 36, GRAV_WHITE);
+        DrawText("5 = filter not started", 492, 432, 36, GRAV_WHITE);
+        DrawText("6 = filter started", 492, 492, 36, GRAV_WHITE);
+        DrawText("7 = filter finished", 492, 552, 36, GRAV_WHITE);
+        DrawText("j = select left", 492, 612, 36, GRAV_WHITE);
+        DrawText("k = select right", 492, 672, 36, GRAV_WHITE);
         if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
         }
