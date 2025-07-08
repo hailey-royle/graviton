@@ -175,8 +175,12 @@ void IncreaseSelectedLevel() {
 
 void DecreaseSelectedLevel() {
     do {
-        selectedLevel--;
-        selectedLevel = selectedLevel % levelFilePathList.count;
+        if (selectedLevel == 0) {
+            selectedLevel = levelFilePathList.count - 1;
+        } else {
+            selectedLevel--;
+            selectedLevel = selectedLevel % levelFilePathList.count;
+        }
     } while (!levelFilters.difficulty[level[selectedLevel].difficulty] || !levelFilters.progress[level[selectedLevel].progress]);
     ResetLevel();
 }
