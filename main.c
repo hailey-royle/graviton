@@ -6,7 +6,7 @@
 //----------------------------------------------------------------
 
 #define FPS 60
-#define SPRITE_SIZE 64
+#define SPRITE_SIZE 60
 #define GRAVITY 0.5
 #define ATOM_TRACE_THICK 4
 
@@ -16,18 +16,15 @@
 #define GRAV_RED (Color){127, 15, 15, 255}
 #define GRAV_BLUE (Color){15, 15, 127, 255}
 
+#define MAX_LEVELS 16
+#define LEVEL_SIZE 648
+#define MAX_STRING 32
 #define MAP_WIDTH 32
 #define MAP_HEIGHT 18
 #define MAP_ITEM_SIZE 60
 #define MAP_ITEM_LINE_WIDTH 4.0
-
-#define UI_SCALE 60
-#define TEXT_PADDING_RELITIVE 8
-
 #define DIFFICULTY_TYPES 4
 #define PROGRESS_TYPES 3
-#define MAX_STRING 32
-
 #define EASY 0
 #define MEDIUM 1
 #define HARD 2
@@ -35,6 +32,10 @@
 #define NOT_TRIED 0
 #define ATTEMPTED 1
 #define FINISHED 2
+
+#define UI_SCALE 60
+#define TEXT_PADDING_RELITIVE 8
+
 
 Texture2D testingGraviton;
 Texture2D testingAtom;
@@ -83,19 +84,17 @@ struct Level {
     int map[MAP_WIDTH * MAP_HEIGHT];
     char name[MAX_STRING];
     char designer[MAX_STRING];
-    Vector2 gravitonStart;
-    Vector2 atomStart;
     int difficulty;
     int progress;
 };
-struct Level level[16];
+struct Level level[MAX_LEVELS];
 
 //----------------------------------------------------------------
 //init functions
 //----------------------------------------------------------------
 
 void InitLevel(char *filePath, int levelNumber) {
-    char levelDataHold[1024];
+    char levelDataHold[LEVEL_SIZE];
     char *levelData= levelDataHold;
     levelData= LoadFileText(filePath);
     int i = 0;
@@ -126,15 +125,7 @@ void InitLevel(char *filePath, int levelNumber) {
                 level[levelNumber].difficulty = HELL;
             }
             i++;
-        } else if (lineNumber == 4) {
-            level[levelNumber].gravitonStart.x = TextToFloat(TextSubtext(levelData, i, 4));
-            level[levelNumber].gravitonStart.y = TextToFloat(TextSubtext(levelData, i + 4, 4));
-            i += 8;
-        } else if (lineNumber == 5) {
-            level[levelNumber].atomStart.x = TextToFloat(TextSubtext(levelData, i, 4));
-            level[levelNumber].atomStart.y = TextToFloat(TextSubtext(levelData, i + 4, 4));
-            i += 8;
-        } else if (lineNumber >= 6) {
+        } else if (lineNumber >= 4) {
             level[levelNumber].map[iMap] = levelData[i];
             i++;
             iMap++;
@@ -168,8 +159,18 @@ void InitGame() {
 //----------------------------------------------------------------
 
 void ResetLevel() {
-    gravitonPosition = level[selectedLevel].gravitonStart;
-    atomPosition = level[selectedLevel].atomStart;
+    for (int i = 0; i < MAP_WIDTH * MAP_HEIGHT; i++) {
+        if (level[selectedLevel].map[i] == 'g') {
+            gravitonPosition.x = ((i % MAP_WIDTH) * MAP_ITEM_SIZE) + (SPRITE_SIZE / 2);
+            gravitonPosition.y = ((i / MAP_WIDTH) * MAP_ITEM_SIZE) + (SPRITE_SIZE / 2);
+        }
+    }
+    for (int i = 0; i < MAP_WIDTH * MAP_HEIGHT; i++) {
+        if (level[selectedLevel].map[i] == 'a') {
+            atomPosition.x = ((i % MAP_WIDTH) * MAP_ITEM_SIZE) + (SPRITE_SIZE / 2);
+            atomPosition.y = ((i / MAP_WIDTH) * MAP_ITEM_SIZE) + (SPRITE_SIZE / 2);
+        }
+    }
     atomSpeed = (Vector2){0, 0};
     atomForce = (Vector2){0, 0};
     timer = 0.0;
@@ -232,12 +233,12 @@ void AtomCollision() {
     for (int i = 0; i <= MAP_WIDTH * MAP_HEIGHT; i++) {
         int mapItemX = (i % MAP_WIDTH) * MAP_ITEM_SIZE;
         int mapItemY = (i / MAP_WIDTH) * MAP_ITEM_SIZE;
-        if (level[selectedLevel].map[i] == KEY_ONE) {
+        if (level[selectedLevel].map[i] == 'o') {
             if (CheckCollisionPointRec(atomPosition, (Rectangle){mapItemX, mapItemY, MAP_ITEM_SIZE, MAP_ITEM_SIZE})) {
                 gameState = GAME_END;
                 gameWon = false;
             }
-        } else if (level[selectedLevel].map[i] == KEY_TWO) {
+        } else if (level[selectedLevel].map[i] == 'f') {
             if (CheckCollisionPointRec(atomPosition, (Rectangle){mapItemX, mapItemY, MAP_ITEM_SIZE, MAP_ITEM_SIZE})) {
                 gameState = GAME_END;
                 gameWon = true;
@@ -247,7 +248,8 @@ void AtomCollision() {
 }
 
 void UpdateAtom() {
-    atomForce = Vector2Scale(Vector2Subtract(gravitonPosition, atomPosition), (GRAVITY / Vector2Distance(atomPosition, gravitonPosition)));
+    atomForce = Vector2Scale(Vector2Subtract(gravitonPosition, atomPosition), 
+            (GRAVITY / Vector2Distance(atomPosition, gravitonPosition)));
     atomSpeed = Vector2Add(atomSpeed, atomForce);
     atomPosition = Vector2Add(Vector2Add(atomPosition, atomSpeed), atomForce);
     UpdateAtomTrace();
@@ -275,9 +277,9 @@ void DrawLevel(bool fullscreen) {
         for (int i = 0; i <= MAP_WIDTH * MAP_HEIGHT; i++) {
             int mapItemX = (i % MAP_WIDTH) * MAP_ITEM_SIZE;
             int mapItemY = (i / MAP_WIDTH) * MAP_ITEM_SIZE;
-            if (level[selectedLevel].map[i] == KEY_ONE) {
+            if (level[selectedLevel].map[i] == 'o') {
                 DrawRectangleLinesEx((Rectangle){mapItemX, mapItemY, MAP_ITEM_SIZE, MAP_ITEM_SIZE}, MAP_ITEM_LINE_WIDTH, GRAV_RED);
-            } else if (level[selectedLevel].map[i] == KEY_TWO) {
+            } else if (level[selectedLevel].map[i] == 'f') {
                 DrawRectangleLinesEx((Rectangle){mapItemX, mapItemY, MAP_ITEM_SIZE, MAP_ITEM_SIZE}, MAP_ITEM_LINE_WIDTH, GRAV_BLUE);
             }
         }
@@ -286,15 +288,19 @@ void DrawLevel(bool fullscreen) {
                 DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
             }
         }
-        DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63}, (Rectangle){atomPosition.x - 32, atomPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
-        DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63}, (Rectangle){gravitonPosition.x - 32, gravitonPosition.y - 32, 64, 64}, (Vector2){0, 0}, 0.0, WHITE);
+        DrawTexturePro(testingAtom, (Rectangle){0, 0, SPRITE_SIZE, SPRITE_SIZE},
+                (Rectangle){atomPosition.x - (SPRITE_SIZE / 2), atomPosition.y - (SPRITE_SIZE / 2), SPRITE_SIZE, SPRITE_SIZE}, 
+                (Vector2){0, 0}, 0.0, WHITE);
+        DrawTexturePro(testingGraviton, (Rectangle){0, 0, SPRITE_SIZE, SPRITE_SIZE}, 
+                (Rectangle){gravitonPosition.x - (SPRITE_SIZE / 2), gravitonPosition.y - (SPRITE_SIZE / 2), SPRITE_SIZE, SPRITE_SIZE}, 
+                (Vector2){0, 0}, 0.0, WHITE);
     } else {
         DrawRectangle(320, 180, 1280, 720, GRAV_BLACK);
         DrawRectangleLinesEx((Rectangle){316, 176, 1288, 728}, 4.0, GRAV_DGRAY);
         for (int i = 0; i <= MAP_WIDTH * MAP_HEIGHT; i++) {
-            if (level[selectedLevel].map[i] == KEY_ONE) {
+            if (level[selectedLevel].map[i] == 'o') {
                 DrawRectangleLinesEx((Rectangle){((i % MAP_WIDTH) * 40) + 320, ((i / MAP_WIDTH) * 40) + 180, 40, 40}, 4.0, GRAV_RED);
-            } else if (level[selectedLevel].map[i] == KEY_TWO) {
+            } else if (level[selectedLevel].map[i] == 'f') {
                 DrawRectangleLinesEx((Rectangle){((i % MAP_WIDTH) * 40) + 320, ((i / MAP_WIDTH) * 40) + 180, 40, 40}, 4.0, GRAV_BLUE);
             }
         }
@@ -332,11 +338,18 @@ void LevelToggleButton(const Rectangle rect, bool *toggle, const char *text, int
     }
 }
 
-void DrawUi() {
+void Ui() {
+    int textPaddingLarge = (2 * UI_SCALE) / TEXT_PADDING_RELITIVE;
+    int textPaddingSmall = UI_SCALE / TEXT_PADDING_RELITIVE;
+    int fontSizeLarge = (2 * UI_SCALE) - (textPaddingLarge * 2);
+    int fontSizeSmall = UI_SCALE - (textPaddingSmall * 2);
+    int fontSizeExtraSmall = UI_SCALE - (textPaddingLarge * 2);
+
     if (gameState == GAME_START) {
         DrawLevel(true);
-        DrawText("Graviton", 66, 66, 108, GRAV_WHITE);
-        if (Button((Rectangle){30 * UI_SCALE, 12, 108, 48}, "Exit", KEY_ESCAPE)) {
+        DrawText("Graviton", UI_SCALE + textPaddingLarge, UI_SCALE + textPaddingLarge, fontSizeLarge, GRAV_WHITE);
+
+        if (Button((Rectangle){30 * UI_SCALE, UI_SCALE / 5, (UI_SCALE * 9) / 5, (UI_SCALE * 4) / 5}, "Exit", KEY_ESCAPE)) {
             quitGame = true;
         }
         if (Button((Rectangle){13 * UI_SCALE, 15 * UI_SCALE, 6 * UI_SCALE, 2 * UI_SCALE}, "Start", KEY_SPACE)) {
@@ -358,9 +371,11 @@ void DrawUi() {
             gameState = GAME_TUTORIAL;
         }
     } else if (gameState == GAME_LEVELS) {
-        DrawText(level[selectedLevel].name, 66, 66, 108, GRAV_WHITE);
-        DrawText(level[selectedLevel].designer, 66, 18, 36, GRAV_WHITE);
+        DrawText(level[selectedLevel].name, UI_SCALE + textPaddingLarge, UI_SCALE + textPaddingLarge, fontSizeLarge, GRAV_WHITE);
+        DrawText(level[selectedLevel].designer, UI_SCALE + textPaddingLarge, textPaddingLarge, fontSizeExtraSmall, GRAV_WHITE);
+
         DrawLevel(false);
+
         if (Button((Rectangle){13 * UI_SCALE, 15 * UI_SCALE, 6 * UI_SCALE, 2 * UI_SCALE}, "Home", KEY_H)) {
             gameState = GAME_START;
         }
@@ -371,37 +386,61 @@ void DrawUi() {
             IncreaseSelectedLevel();
         }
 
-        LevelToggleButton((Rectangle){60, 180, 240, 48}, &levelFilters.difficulty[EASY], "Easy", KEY_ONE);
-        LevelToggleButton((Rectangle){60, 240, 240, 48}, &levelFilters.difficulty[MEDIUM], "Medium", KEY_TWO);
-        LevelToggleButton((Rectangle){60, 300, 240, 48}, &levelFilters.difficulty[HARD], "Hard", KEY_THREE);
-        LevelToggleButton((Rectangle){60, 360, 240, 48}, &levelFilters.difficulty[HELL], "Hell", KEY_FOUR);
-        LevelToggleButton((Rectangle){60, 420, 240, 48}, &levelFilters.progress[NOT_TRIED], "Not Tried", KEY_FIVE);
-        LevelToggleButton((Rectangle){60, 480, 240, 48}, &levelFilters.progress[ATTEMPTED], "Attempted", KEY_SIX);
-        LevelToggleButton((Rectangle){60, 540, 240, 48}, &levelFilters.progress[FINISHED], "Finished", KEY_SEVEN);
+        LevelToggleButton((Rectangle){UI_SCALE, 3 * UI_SCALE, 4 * UI_SCALE, (UI_SCALE * 4) / 5}, 
+                &levelFilters.difficulty[EASY], "Easy", KEY_ONE);
+
+        LevelToggleButton((Rectangle){UI_SCALE, 4 * UI_SCALE, 4 * UI_SCALE, (UI_SCALE * 4) / 5}, 
+                &levelFilters.difficulty[MEDIUM], "Medium", KEY_TWO);
+
+        LevelToggleButton((Rectangle){UI_SCALE, 5 * UI_SCALE, 4 * UI_SCALE, (UI_SCALE * 4) / 5}, 
+                &levelFilters.difficulty[HARD], "Hard", KEY_THREE);
+
+        LevelToggleButton((Rectangle){UI_SCALE, 6 * UI_SCALE, 4 * UI_SCALE, (UI_SCALE * 4) / 5}, 
+                &levelFilters.difficulty[HELL], "Hell", KEY_FOUR);
+
+        LevelToggleButton((Rectangle){UI_SCALE, 7 * UI_SCALE, 4 * UI_SCALE, (UI_SCALE * 4) / 5}, 
+                &levelFilters.progress[NOT_TRIED], "Not Tried", KEY_FIVE);
+
+        LevelToggleButton((Rectangle){UI_SCALE, 8 * UI_SCALE, 4 * UI_SCALE, (UI_SCALE * 4) / 5}, 
+                &levelFilters.progress[ATTEMPTED], "Attempted", KEY_SIX);
+
+        LevelToggleButton((Rectangle){UI_SCALE, 9 * UI_SCALE, 4 * UI_SCALE, (UI_SCALE * 4) / 5}, 
+                &levelFilters.progress[FINISHED], "Finished", KEY_SEVEN);
+
     } else if (gameState == GAME_COSMETICS) {
         if (Button((Rectangle){13 * UI_SCALE, 15 * UI_SCALE, 6 * UI_SCALE, 2 * UI_SCALE}, "Home", KEY_H)) {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_SETTINGS) {
-        DrawText("hotkeys", 60, 120, 48, GRAV_WHITE);
-        DrawText("space = start level", 66, 192, 36, GRAV_WHITE);
-        DrawText("h = home", 66, 252, 36, GRAV_WHITE);
-        DrawText("l = levels", 66, 312, 36, GRAV_WHITE);
-        DrawText("c = cosmetics", 66, 372, 36, GRAV_WHITE);
-        DrawText("s = settings", 66, 432, 36, GRAV_WHITE);
-        DrawText("i = information", 66, 492, 36, GRAV_WHITE);
-        DrawText("t = tutorial", 66, 552, 36, GRAV_WHITE);
-        DrawText("level menu hotkeys", 480, 120, 48, GRAV_WHITE);
-        DrawText("1 = filter easy", 492, 192, 36, GRAV_WHITE);
-        DrawText("2 = filter medium", 492, 252, 36, GRAV_WHITE);
-        DrawText("3 = filter hard", 492, 312, 36, GRAV_WHITE);
-        DrawText("4 = filter hell", 492, 372, 36, GRAV_WHITE);
-        DrawText("5 = filter not tried", 492, 432, 36, GRAV_WHITE);
-        DrawText("6 = filter attempeted", 492, 492, 36, GRAV_WHITE);
-        DrawText("7 = filter finished", 492, 552, 36, GRAV_WHITE);
-        DrawText("j = select left", 492, 612, 36, GRAV_WHITE);
-        DrawText("k = select right", 492, 672, 36, GRAV_WHITE);
-        if (Button((Rectangle){780, 900, 360, 120}, "Home", KEY_H)) {
+        DrawText("hotkeys", UI_SCALE + textPaddingSmall, (2 * UI_SCALE) + textPaddingSmall, fontSizeSmall, GRAV_WHITE);
+        DrawText("space = Start Level", UI_SCALE + textPaddingSmall, (3 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("h = Home", UI_SCALE + textPaddingSmall, (4 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("l = Levles", UI_SCALE + textPaddingSmall, (5 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("c = Cosmetics", UI_SCALE + textPaddingSmall, (6 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("s = Settings", UI_SCALE + textPaddingSmall, (7 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("i = Information", UI_SCALE + textPaddingSmall, (8 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("t = Tutorial", UI_SCALE + textPaddingSmall, (9 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+
+        DrawText("1 = Filter Easy", 
+                (8 * UI_SCALE) + textPaddingSmall, (3 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("2 = Filter Meduim", 
+                (8 * UI_SCALE) + textPaddingSmall, (4 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("3 = Filter Hard", 
+                (8 * UI_SCALE) + textPaddingSmall, (5 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("4 = FIlter Hell", 
+                (8 * UI_SCALE) + textPaddingSmall, (6 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("5 = Filter Not Tried", 
+                (8 * UI_SCALE) + textPaddingSmall, (7 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("6 = Filter Attempted", 
+                (8 * UI_SCALE) + textPaddingSmall, (8 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("7 = Filter Finished", 
+                (8 * UI_SCALE) + textPaddingSmall, (9 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("j = Select Left", 
+                (8 * UI_SCALE) + textPaddingSmall, (10 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        DrawText("k = Select Right", 
+                (8 * UI_SCALE) + textPaddingSmall, (11 * UI_SCALE) + textPaddingSmall, fontSizeExtraSmall, GRAV_WHITE);
+        
+        if (Button((Rectangle){13 * UI_SCALE, 15 * UI_SCALE, 6 * UI_SCALE, 2 * UI_SCALE}, "Home", KEY_H)) {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_INFORMATION) {
@@ -414,19 +453,23 @@ void DrawUi() {
         }
     } else if (gameState == GAME_PLAY) {
         DrawLevel(true);
+
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
     } else if (gameState == GAME_END) {
         DrawLevel(true);
+
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
+
         if (gameWon == true) {
-            DrawText("You Won!", 66, 66, 108, GRAV_WHITE);
+            DrawText("You Won!", UI_SCALE + textPaddingLarge, UI_SCALE + textPaddingLarge, fontSizeLarge, GRAV_WHITE);
         }
         if (gameWon == false) {
-            DrawText("You Lost!", 66, 66, 108, GRAV_WHITE);
+            DrawText("You Lost!", UI_SCALE + textPaddingLarge, UI_SCALE + textPaddingLarge, fontSizeLarge, GRAV_WHITE);
         }
-        if (Button((Rectangle){13 * UI_SCALE, 15 * UI_SCALE, 6 * UI_SCALE, 3 * UI_SCALE}, "Home", KEY_H)) {
+
+        if (Button((Rectangle){13 * UI_SCALE, 15 * UI_SCALE, 6 * UI_SCALE, 2 * UI_SCALE}, "Home", KEY_H)) {
             gameState = GAME_START;
             ResetLevel();
         }
@@ -436,7 +479,7 @@ void DrawUi() {
 void Draw() {
     BeginDrawing();
         ClearBackground(GRAV_BLACK);
-        DrawUi();
+        Ui();
     EndDrawing();
 }
 
