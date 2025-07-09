@@ -22,7 +22,7 @@
 #define MAP_WIDTH 32
 #define MAP_HEIGHT 18
 #define MAP_ITEM_SIZE 60
-#define MAP_ITEM_LINE_WIDTH 4.0
+#define MAP_ITEM_LINE 4.0
 #define DIFFICULTY_TYPES 4
 #define PROGRESS_TYPES 3
 #define EASY 0
@@ -35,6 +35,7 @@
 
 #define UI_SCALE 60
 #define TEXT_PADDING_RELITIVE 8
+#define LEVEL_BORDER 4
 
 
 Texture2D testingGraviton;
@@ -272,45 +273,50 @@ void Update() {
 //updating the screen functions
 //----------------------------------------------------------------
 
-void DrawLevel(bool fullscreen) {
-    if (fullscreen == true) { 
-        for (int i = 0; i <= MAP_WIDTH * MAP_HEIGHT; i++) {
-            int mapItemX = (i % MAP_WIDTH) * MAP_ITEM_SIZE;
-            int mapItemY = (i / MAP_WIDTH) * MAP_ITEM_SIZE;
-            if (level[selectedLevel].map[i] == 'o') {
-                DrawRectangleLinesEx((Rectangle){mapItemX, mapItemY, MAP_ITEM_SIZE, MAP_ITEM_SIZE}, MAP_ITEM_LINE_WIDTH, GRAV_RED);
-            } else if (level[selectedLevel].map[i] == 'f') {
-                DrawRectangleLinesEx((Rectangle){mapItemX, mapItemY, MAP_ITEM_SIZE, MAP_ITEM_SIZE}, MAP_ITEM_LINE_WIDTH, GRAV_BLUE);
-            }
+void DrawLevel(int xOffset, int yOffset, int localUiScale) {
+    if (localUiScale != UI_SCALE) {
+        DrawRectangleLinesEx(
+            (Rectangle){
+            xOffset - LEVEL_BORDER, 
+            yOffset - LEVEL_BORDER, 
+            (localUiScale * MAP_WIDTH) + (LEVEL_BORDER * 2), 
+            (localUiScale * MAP_HEIGHT) + (LEVEL_BORDER * 2)}, 
+            LEVEL_BORDER, GRAV_DGRAY);
+    }
+
+    int mapItemLineScaled = (MAP_ITEM_LINE * localUiScale) / UI_SCALE;
+    for (int i = 0; i <= MAP_WIDTH * MAP_HEIGHT; i++) {
+        int mapItemX = ((i % MAP_WIDTH) * localUiScale) + xOffset;
+        int mapItemY = ((i / MAP_WIDTH) * localUiScale) + yOffset;
+        if (level[selectedLevel].map[i] == 'o') {
+            DrawRectangleLinesEx((Rectangle){mapItemX, mapItemY, localUiScale, localUiScale}, mapItemLineScaled, GRAV_RED);
+        } else if (level[selectedLevel].map[i] == 'f') {
+            DrawRectangleLinesEx((Rectangle){mapItemX, mapItemY, localUiScale, localUiScale}, mapItemLineScaled, GRAV_BLUE);
         }
+    }
+    if (localUiScale == UI_SCALE) {
         for (int i = 0; i <= FPS; i++) {
             if (atomTrace[i].active == true) {
                 DrawLineEx(atomTrace[i].start, atomTrace[i].end, ATOM_TRACE_THICK, GRAV_DGRAY);
             }
         }
-        DrawTexturePro(testingAtom, (Rectangle){0, 0, SPRITE_SIZE, SPRITE_SIZE},
-                (Rectangle){atomPosition.x - (SPRITE_SIZE / 2), atomPosition.y - (SPRITE_SIZE / 2), SPRITE_SIZE, SPRITE_SIZE}, 
-                (Vector2){0, 0}, 0.0, WHITE);
-        DrawTexturePro(testingGraviton, (Rectangle){0, 0, SPRITE_SIZE, SPRITE_SIZE}, 
-                (Rectangle){gravitonPosition.x - (SPRITE_SIZE / 2), gravitonPosition.y - (SPRITE_SIZE / 2), SPRITE_SIZE, SPRITE_SIZE}, 
-                (Vector2){0, 0}, 0.0, WHITE);
-    } else {
-        DrawRectangle(320, 180, 1280, 720, GRAV_BLACK);
-        DrawRectangleLinesEx((Rectangle){316, 176, 1288, 728}, 4.0, GRAV_DGRAY);
-        for (int i = 0; i <= MAP_WIDTH * MAP_HEIGHT; i++) {
-            if (level[selectedLevel].map[i] == 'o') {
-                DrawRectangleLinesEx((Rectangle){((i % MAP_WIDTH) * 40) + 320, ((i / MAP_WIDTH) * 40) + 180, 40, 40}, 4.0, GRAV_RED);
-            } else if (level[selectedLevel].map[i] == 'f') {
-                DrawRectangleLinesEx((Rectangle){((i % MAP_WIDTH) * 40) + 320, ((i / MAP_WIDTH) * 40) + 180, 40, 40}, 4.0, GRAV_BLUE);
-            }
-        }
-        DrawTexturePro(testingAtom, (Rectangle){0, 0, 63, 63},
-            (Rectangle){(((atomPosition.x - 16) * 2) / 3) + 320, (((atomPosition.y - 16) * 2) / 3) + 180, 32, 32},
-            (Vector2){0, 0}, 0.0, WHITE);
-        DrawTexturePro(testingGraviton, (Rectangle){0, 0, 63, 63},
-            (Rectangle){(((gravitonPosition.x - 16) * 2) / 3) + 320, (((gravitonPosition.y - 16) * 2) / 3) + 180, 32, 32},
-            (Vector2){0, 0}, 0.0, WHITE);
     }
+
+    DrawTexturePro(testingAtom, (Rectangle){0, 0, SPRITE_SIZE, SPRITE_SIZE},
+        (Rectangle){
+        (((atomPosition.x - (SPRITE_SIZE / 2)) * localUiScale) / UI_SCALE) + xOffset, 
+        (((atomPosition.y - (SPRITE_SIZE / 2)) * localUiScale) / UI_SCALE) + yOffset, 
+        (SPRITE_SIZE * localUiScale) / UI_SCALE, 
+        (SPRITE_SIZE * localUiScale) / UI_SCALE}, 
+        (Vector2){0, 0}, 0.0, WHITE);
+
+    DrawTexturePro(testingGraviton, (Rectangle){0, 0, SPRITE_SIZE, SPRITE_SIZE}, 
+        (Rectangle){
+        (((gravitonPosition.x - (SPRITE_SIZE / 2)) * localUiScale) / UI_SCALE) + xOffset, 
+        (((gravitonPosition.y - (SPRITE_SIZE / 2)) * localUiScale) / UI_SCALE) + yOffset, 
+        (SPRITE_SIZE * localUiScale) / UI_SCALE, 
+        (SPRITE_SIZE * localUiScale) / UI_SCALE}, 
+        (Vector2){0, 0}, 0.0, WHITE);
 }
 
 bool Button(const Rectangle rect, const char *text, int key) {
@@ -346,7 +352,8 @@ void Ui() {
     int fontSizeExtraSmall = UI_SCALE - (textPaddingLarge * 2);
 
     if (gameState == GAME_START) {
-        DrawLevel(true);
+        DrawLevel(0, 0, UI_SCALE);
+
         DrawText("Graviton", UI_SCALE + textPaddingLarge, UI_SCALE + textPaddingLarge, fontSizeLarge, GRAV_WHITE);
 
         if (Button((Rectangle){30 * UI_SCALE, UI_SCALE / 5, (UI_SCALE * 9) / 5, (UI_SCALE * 4) / 5}, "Exit", KEY_ESCAPE)) {
@@ -371,10 +378,10 @@ void Ui() {
             gameState = GAME_TUTORIAL;
         }
     } else if (gameState == GAME_LEVELS) {
+        DrawLevel(360, 180, 40);
+
         DrawText(level[selectedLevel].name, UI_SCALE + textPaddingLarge, UI_SCALE + textPaddingLarge, fontSizeLarge, GRAV_WHITE);
         DrawText(level[selectedLevel].designer, UI_SCALE + textPaddingLarge, textPaddingLarge, fontSizeExtraSmall, GRAV_WHITE);
-
-        DrawLevel(false);
 
         if (Button((Rectangle){13 * UI_SCALE, 15 * UI_SCALE, 6 * UI_SCALE, 2 * UI_SCALE}, "Home", KEY_H)) {
             gameState = GAME_START;
@@ -452,12 +459,12 @@ void Ui() {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_PLAY) {
-        DrawLevel(true);
+        DrawLevel(0, 0, UI_SCALE);
 
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
     } else if (gameState == GAME_END) {
-        DrawLevel(true);
+        DrawLevel(0, 0, UI_SCALE);
 
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
