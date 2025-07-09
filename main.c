@@ -81,17 +81,21 @@ void InitLevel(char *filePath, int funi) {
     levelDataPointer = LoadFileText(filePath);
     int i = 0;
     int j = 0;
+    int k = 0;
     int lineNumber = 1;
     while (levelDataPointer[i] != '\0') {
         if (levelDataPointer[i] == '\n') {
             lineNumber++;
             i++;
+            k = 0;
         } else if (lineNumber == 1) {
-            level[funi].name[i] = levelDataPointer[i];
+            level[funi].name[k] = levelDataPointer[i];
             i++;
+            k++;
         } else if (lineNumber == 2) {
-            level[funi].designer[i] = levelDataPointer[i];
+            level[funi].designer[k] = levelDataPointer[i];
             i++;
+            k++;
         } else if (lineNumber == 3) {
             if (levelDataPointer[i] == '1') {
                 level[funi].difficulty = 0;
@@ -343,7 +347,7 @@ void ToggleButton(const Rectangle rect, bool *toggle, const char *text) {
 void DrawUi() {
     if (gameState == GAME_START) {
         DrawLevel(true);
-        DrawText("Graviton", 60, 60, 120, GRAV_WHITE);
+        DrawText("Graviton", 66, 66, 108, GRAV_WHITE);
         if (Button((Rectangle){1800, 12, 108, 48}, "Exit")) {
             quitGame = true;
         }
@@ -366,6 +370,8 @@ void DrawUi() {
             gameState = GAME_TUTORIAL;
         }
     } else if (gameState == GAME_LEVELS) {
+        DrawText(level[selectedLevel].name, 66, 66, 108, GRAV_WHITE);
+        DrawText(level[selectedLevel].designer, 66, 18, 36, GRAV_WHITE);
         DrawLevel(false);
         if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
@@ -426,10 +432,10 @@ void DrawUi() {
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
         if (gameWon == true) {
-            DrawText("You Won!", 60, 60, 120, GRAV_WHITE);
+            DrawText("You Won!", 66, 66, 108, GRAV_WHITE);
         }
         if (gameWon == false) {
-            DrawText("You Lost!", 60, 60, 120, GRAV_WHITE);
+            DrawText("You Lost!", 66, 66, 108, GRAV_WHITE);
         }
         if (Button((Rectangle){780, 900, 360, 120}, "Home")) {
             gameState = GAME_START;
