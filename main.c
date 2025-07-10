@@ -51,8 +51,8 @@ float timer = 0.0;
 bool gameWon = false;
 bool quitGame = false;
 
-Vector2 gravitonPosition = (Vector2){-100, -100};
-Vector2 atomPosition = (Vector2){-100, -100};
+Vector2 gravitonPosition = (Vector2){0, 0};
+Vector2 atomPosition = (Vector2){0, 0};
 Vector2 atomSpeed = (Vector2){0, 0};
 Vector2 atomForce = (Vector2){0, 0};
 
@@ -273,7 +273,9 @@ void Update() {
 //updating the screen functions
 //----------------------------------------------------------------
 
-void DrawLevel(int xOffset, int yOffset, int localUiScale) {
+void DrawLevel(int localUiScale) {
+    int xOffset = ((MAP_WIDTH * UI_SCALE) - (MAP_WIDTH * localUiScale)) / 2;
+    int yOffset = ((MAP_HEIGHT * UI_SCALE) - (MAP_HEIGHT * localUiScale)) / 2;
     if (localUiScale != UI_SCALE) {
         DrawRectangleLinesEx(
             (Rectangle){
@@ -294,6 +296,7 @@ void DrawLevel(int xOffset, int yOffset, int localUiScale) {
             DrawRectangleLinesEx((Rectangle){mapItemX, mapItemY, localUiScale, localUiScale}, mapItemLineScaled, GRAV_BLUE);
         }
     }
+
     if (localUiScale == UI_SCALE) {
         for (int i = 0; i <= FPS; i++) {
             if (atomTrace[i].active == true) {
@@ -352,7 +355,7 @@ void Ui() {
     int fontSizeExtraSmall = UI_SCALE - (textPaddingLarge * 2);
 
     if (gameState == GAME_START) {
-        DrawLevel(0, 0, UI_SCALE);
+        DrawLevel(UI_SCALE);
 
         DrawText("Graviton", UI_SCALE + textPaddingLarge, UI_SCALE + textPaddingLarge, fontSizeLarge, GRAV_WHITE);
 
@@ -378,7 +381,7 @@ void Ui() {
             gameState = GAME_TUTORIAL;
         }
     } else if (gameState == GAME_LEVELS) {
-        DrawLevel(360, 180, 40);
+        DrawLevel((UI_SCALE * 2) / 3);
 
         DrawText(level[selectedLevel].name, UI_SCALE + textPaddingLarge, UI_SCALE + textPaddingLarge, fontSizeLarge, GRAV_WHITE);
         DrawText(level[selectedLevel].designer, UI_SCALE + textPaddingLarge, textPaddingLarge, fontSizeExtraSmall, GRAV_WHITE);
@@ -459,12 +462,12 @@ void Ui() {
             gameState = GAME_START;
         }
     } else if (gameState == GAME_PLAY) {
-        DrawLevel(0, 0, UI_SCALE);
+        DrawLevel(UI_SCALE);
 
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
     } else if (gameState == GAME_END) {
-        DrawLevel(0, 0, UI_SCALE);
+        DrawLevel(UI_SCALE);
 
         DrawText(TextFormat("%.2f", timer), 1792, 32, 32, GRAV_WHITE);
         DrawText(TextFormat("%d", gravitonMoves), 1792, 96, 32, GRAV_WHITE);
